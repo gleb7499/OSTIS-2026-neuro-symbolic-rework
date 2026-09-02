@@ -12,6 +12,7 @@
         "bib/links.bib",
         "README.md",
         "AGENTS.md",
+        "STYLEGUIDE.md",
         ".github/CODEOWNERS",
         ".github/workflows/file-guard.yml",
         ".github/scripts/file-guard.py",
