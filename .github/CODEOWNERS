@@ -1,0 +1,25 @@
+# CODEOWNERS — владельцы файлов репозитория OSTIS-2026.
+# Заполните GitHub-юзернеймы Юры, Димы, Жени и Давида, затем раскомментируйте строки.
+# После этого GitHub будет автоматически запрашивать review у владельца измененного файла.
+
+# По умолчанию всем владеет координатор (Глеб) — до заполнения остальных владельцев.
+* @gleb7499
+
+# Черновики участников
+/drafts/gleb_intro_scada.tex @gleb7499
+# /drafts/yura_standards.tex @YURA_USERNAME
+# /drafts/dima_neuro.tex @DIMA_USERNAME
+# /drafts/zhenya_plcnext_pid.tex @ZHENYA_USERNAME
+# /drafts/david_final.tex @DAVID_USERNAME
+
+# Общая папка рисунков — все участники (раскомментируйте после заполнения юзернеймов)
+# /figures/ @gleb7499 @YURA_USERNAME @DIMA_USERNAME @ZHENYA_USERNAME @DAVID_USERNAME
+
+# Библиография ведется Давидом
+# /bib/links.bib @DAVID_USERNAME
+/bib/links.bib @gleb7499
+
+# Служебные файлы — только координатор
+/README.md @gleb7499
+/AGENTS.md @gleb7499
+/.github/ @gleb7499

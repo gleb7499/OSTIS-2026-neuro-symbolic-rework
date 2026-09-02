@@ -1,0 +1,1 @@
+{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qpredictive detector; state classifier; rule-based diagnostic detector; time-to-threshold forecast detector; stream processor; event processor.\\E$"}

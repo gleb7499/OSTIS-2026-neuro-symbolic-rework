@@ -1,0 +1,22 @@
+{
+  "_comment": "Заполните github-юзернеймы Юры, Димы, Жени и Давида и переведите strict в true, чтобы включить жесткую проверку.",
+  "strict": false,
+  "authors": {
+    "gleb7499": {
+      "name": "Глеб",
+      "prefix": "gleb",
+      "allowed": [
+        "drafts/gleb_intro_scada.tex",
+        "figures/*",
+        "figures/**",
+        "bib/links.bib",
+        "README.md",
+        "AGENTS.md",
+        ".github/CODEOWNERS",
+        ".github/workflows/file-guard.yml",
+        ".github/scripts/file-guard.py",
+        ".github/file-guard-mapping.json"
+      ]
+    }
+  }
+}

@@ -1,0 +1,199 @@
+%% =============================================================================
+%% ОБЩИЕ ПРАВИЛА (для людей и для ИИ-агентов)
+%% =============================================================================
+%% 1. Это черновик ОДНОГО участника. Редактируй только этот файл.
+%% 2. Не меняй чужие файлы в папке drafts/.
+%% 3. Не трогай корневой main.tex, преамбулу, стили (.cls, .sty), .github/.
+%% 4. Можно использовать существующие метки (ef, \label, \cite), но не переименовывай их без согласования.
+%% 5. Новые рисунки складывай в figures/ с уникальным именем: <имя>_<смысл>.png.
+%% 6. Новые источники (BibTeX) пришли Давиду (david_final.tex) или в issues.
+%% 7. Сохраняй статью в формате IEEEtran; не меняй шрифты/поля.
+%% 8. После правки скинь файл координатору; сборка PDF делается в main.tex.
+%% =============================================================================
+
+%% УЧАСТНИК: Юра
+%% РАЗДЕЛЫ: AI and standards + Problems and state of the art + описания ISA-88/95/5.1
+%% ЗАДАЧИ:
+%%   - Переформулировать все тезисы про стандарты и онтологии.
+%%   - Привязать ISA-88/95/5.1 к задаче пастеризации (рецепты, MES/ERP, документация).
+%%   - Обновить TikZ-диаграммы ISA (цвета/формы) или заменить на новые схемы.
+%%   - Добавить свежие источники по ISA и онтологиям (2023-2025).
+%% =============================================================================
+
+\section{AI and standards}
+
+Although neural networks have given us many interesting developments,
+researchers believe that for progress, AI must understand not only "what" but
+also "why", that is, process cause-and-effect relationships. This has led to the
+search for new directions in AI. Neuro-symbolic AI is a form of AI that combines
+machine learning methods with symbolic systems.
+
+
+Standardization describes different aspects of each developed human activity and
+includes a system of concepts (including terminology), a typology, and a model
+that describes how to apply appropriate methods and means, production sites,
+types, and structures of project documents, and accompanying activities. The
+existence of standards helps solve one of the key problems related to any
+technology, particularly rapidly developing computer information technologies,
+\textbf{compatibility problem} \cite{Golenkov2019}. Compatibility can be
+analyzed from many aspects, from the consistency of terminology in the
+interactions of process participants to the consistency of actions taken in the
+process of technology application.
+
+The cohesion of digital twin models is challenged by the need for many
+disparate, unrelated, and heterogeneous models. On the other hand, connecting
+digital twins in a single system \cite{DigitalTwins} requires interaction and
+conceptual unification. It also requires SCADA systems to achieve higher levels
+of integration, scalability, and technological modernity \cite{Mladen2022}.
+
+Despite advances in information technology, most standards are now presented in
+the form of traditional linear documents or web resources containing a series of
+static pages connected by hyperlinks. This approach to expressing standards has
+many serious drawbacks, and ultimately, the overhead costs of maintaining and
+using standards outweigh their benefits \cite{Serenkov-2004}.
+
+Recently, the development of semantic technologies has enabled the creation of a
+new generation of standards based on formalized knowledge representation. These
+standards allow for the creation of intelligent systems that can automatically
+process and use this knowledge. This approach is based on the use of ontologies,
+which are formal representations of knowledge in a specific domain, enabling the
+creation of a common vocabulary and understanding of the concepts and
+relationships within that domain \cite{Golenkov2019}.
+
+\href{https://www.isa.org/}{ISA} (International Society of Automation) has
+released Mimo: a large language model (LLM) specifically trained on ISA content
+\cite{Mimo2024}, such as standards, technical reports, and other documents. It
+is designed to assist users in understanding and applying ISA standards and
+practices. Mimo can answer questions, provide explanations, and generate text
+related to ISA content. It is intended to be a valuable resource for
+professionals in the automation and control industry. Mimo is not a replacement
+for human expertise but rather a tool to enhance understanding and application
+of ISA standards.
+
+However, the Mimo model is not open source and cannot be used in production. It
+also cannot be integrated with other systems.
+
+\section{Problems and state of the art}
+
+An analysis of the work has made it possible to formulate the most important and
+common problems related to the development and application of modern standards
+in various fields \cite{Serenkov-2004, Uglev-2012}:
+
+\begin{itemize}
+  \item Above all, the complexity of maintaining the standards themselves due to
+    the duplication of information, especially the complexity of changing
+    terminology.
+  \item Duplicate information in the documentation describing the standard.
+  \item Standards internationalization issues — translating a standard into
+    multiple languages actually requires supporting and coordinating independent
+    versions of the standard in different languages.
+  \item As a result, inconsistencies in the format of different standards. Also
+    automating the process of developing and applying standards is complicated.
+  \item The inconvenience of using the standard, especially the complexity of
+    finding the information you need. As a result, the complexity of studying
+    standards.
+  \item The complexity of automating the verification that an object or process
+    complies with the requirements of a particular standard.
+  \item etc.
+\end{itemize}
+
+These problems are mainly related to the presentation of standards. The most
+promising approach to solve these problems is the transformation of each
+specific standard into a knowledge base, which is based on a set of ontologies
+corresponding to this standard \cite{Golenkov2019, Serenkov-2004, Uglev-2012,
+Improving-2017, ISA-88-formalization}. This approach allows us to significantly
+automate the development processes of the standard and its application.
+
+As an example, consider the \textbf{\textit{ISA-88}} \cite{ISA88} standard (the
+basic standard for batch production). Although this standard is widely used by
+American and European companies and is actively implemented on the territory of
+the Republic of Belarus, it has a number of drawbacks. Essential ISA batch
+systems standards are shown at Fig. \ref {fig:s88_parts}.
+
+\begin{figure}[ht]
+  \centering
+  \begin{adjustbox}{width = \columnwidth}
+    \begin{tikzpicture}[node distance=8mm and 18mm, every node/.style={draw, rounded corners, align=center, minimum width=26mm, minimum height=7mm, fill=blue!12}, arrow/.style={-Latex, thick}]
+      \node[fill=blue!28] (root) {ISA-88}; \node[below=of root] (main)
+      {88.00.01-2010}; \node[below left=of main] (sub1) {88.00.02-2001};
+      \node[below right=of main] (sub2) {TR 88.00.02-2015}; \node[below=of sub2]
+      (sub3) {TR 88.0.03-1996}; \node[below=of sub1] (sub4) {88.00.03-2003};
+      \node[below left=of sub4] (sub5) {88.00.04-2006}; \node[below right=of
+      sub4] (sub6) {TR 88.95.01-2008}; \node[below=of sub4] (sub7) {IEC
+      61512-1\\GOST R IEC 61512-1-2016};
+
+      \draw[arrow] (root) -- (main); \draw[arrow] (main) -- (sub1); \draw[arrow]
+      (main) -- (sub2); \draw[arrow] (main) -- (sub3); \draw[arrow] (sub1) --
+      (sub4); \draw[arrow] (sub4) -- (sub5); \draw[arrow] (sub4) -- (sub6);
+      \draw[arrow] (sub4) -- (sub7);
+    \end{tikzpicture}
+  \end{adjustbox}
+  \caption{ISA-88 parts as a hierarchical diagram}
+  \label{fig:s88_parts}
+\end{figure}
+
+Another standard often used in the context of Industry 4.0 is
+\textit{\textbf{ISA-95}} \cite{ISA95}. \textit{\textbf{ISA-95}} is an industry
+standard for describing high-level control systems. Its main purpose is to
+simplify the development of such systems, abstract from the hardware
+implementation and provide a single interface to interact with the ERP and MES
+layers. Consists of eight distinct sections, described at Fig. \ref
+{fig:s95_parts}.
+
+\begin{figure}[ht]
+  \centering
+  \begin{adjustbox}{width = \columnwidth}
+    \begin{tikzpicture}[node distance=10mm and 20mm, every node/.style={draw, rounded corners, align=center, minimum width=28mm, minimum height=8mm, fill=green!12}, arrow/.style={-Latex, thick}]
+      \node[fill=green!28] (root95) {ISA-95}; \node[below=of root95] (a)
+      {95.00.01-2010}; \node[below left=of a] (b) {95.00.02-2018};
+      \node[below=of a] (c) {95.00.03-2013}; \node[below right=of a] (d)
+      {95.00.04-2018}; \node[below=of c] (e) {95.00.05-2018}; \node[below
+      left=of e] (f) {95.00.06-2014}; \node[below right=of e] (g)
+      {95.00.07-2017}; \node[below=of e] (h) {95.00.08-2020};
+
+      \draw[arrow] (root95) -- (a); \draw[arrow] (a) -- (b); \draw[arrow] (a) --
+      (c); \draw[arrow] (a) -- (d); \draw[arrow] (c) -- (e); \draw[arrow] (e) --
+      (f); \draw[arrow] (e) -- (g); \draw[arrow] (e) -- (h);
+    \end{tikzpicture}
+  \end{adjustbox}
+  \caption{ISA-95 parts as a hierarchical diagram}
+  \label{fig:s95_parts}
+\end{figure}
+
+Models help define boundaries between business and control systems. They help
+answer questions about which functions can perform which tasks and what
+information must be exchanged between applications. The ISA5 standards
+development committee is often referred to as the \textit{\textbf{ISA-5.1}}
+standard among practitioners. However, the ISA5 committee, “Documentation of
+Measurement and Control Instruments and Systems”, has a broader scope — namely
+to develop standards, recommended practices, and technical reports for
+documenting and illustrating measurement and control instruments and systems
+suitable for all industries. ISA5 standards consist of the following parts (Fig.
+\ref {fig:isa5_parts}).
+
+\begin{figure}[ht]
+  \centering
+  \begin{adjustbox}{width = \columnwidth}
+    \begin{tikzpicture}[node distance=10mm and 20mm, every node/.style={draw, rounded corners, align=center, minimum width=28mm, minimum height=8mm, fill=orange!12}, arrow/.style={-Latex, thick}]
+      \node[fill=orange!28] (root5) {ISA-5}; \node[below=of root5] (a5)
+      {5.1-2024}; \node[below left=of a5] (b5) {TR 5.1.02-2024}; \node[below=of
+      a5] (c5) {TR 5.1.03-2024}; \node[below right=of a5] (d5) {5.4-1991};
+      \node[below=of c5] (e5) {5.06.01-2007}; \node[below=of e5] (f5) {TR
+      5.1.01/77.40.01-2012 (R2016)};
+
+      \draw[arrow] (root5) -- (a5); \draw[arrow] (a5) -- (b5); \draw[arrow] (a5)
+      -- (c5); \draw[arrow] (a5) -- (d5); \draw[arrow] (c5) -- (e5);
+      \draw[arrow] (e5) -- (f5);
+    \end{tikzpicture}
+  \end{adjustbox}
+  \caption{ISA-5 parts as a hierarchical diagram}
+  \label{fig:isa5_parts}
+\end{figure}
+
+This standard is useful when a reference to equipment is required in the
+chemical, petroleum, power generation, air conditioning, metal refining, and
+many other industries. The standard enables anyone with a reasonable level of
+plant knowledge to read flow charts to understand how to measure and control a
+process without having to go into the details of instrumentation or the
+knowledge of an instrumentation expert.
+

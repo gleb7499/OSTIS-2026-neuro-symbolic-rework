@@ -1,0 +1,10 @@
+{"rule":"CONSECUTIVE_SPACES","sentence":"^\\QT2A  Tempora-TLF\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QT2A  Tempora-TLF\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\Q[width=, height=0.9, keepaspectratio] figures/MLAD_in_industry.png Kaspersky MLAD system in the production process\\E$"}
+{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qpredictive detector; state classifier; rule-based diagnostic detector; time-to-threshold forecast detector; stream processor; event processor.\\E$"}
+{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qincreasing safety and explainability in regulated industries (for example, finance, healthcare), where it is critically important to understand why an AI made a particular decision.\\E$"}
+{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qautomating complex tasks that require logical inference: processing documents up to 80,000 tokens, analyzing regulations, verifying code, and making rule-based decisions.\\E$"}
+{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qreducing computing costs: by integrating symbolic methods, it is possible to reduce dependence on huge volumes of data and parameters, making systems more efficient and environmentally friendly.\\E$"}
+{"rule":"MISSING_ARTICLE","sentence":"^\\QThe first paradigm of AI was symbolic AI, which is based on symbolic representation of tasks and logical inference.\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\Qwhere \"sysid=unit\" defines a term (the name of an entity) whose value we want to find out (in this example, in fact, the answer to the question \"What is a unit?\").\\E$"}
+{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qwhere \"sysid=unit\" defines a term (the name of an entity) whose value we want to find out (in this example, in fact, the answer to the question \"What is a unit?\").\\E$"}
