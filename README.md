@@ -55,10 +55,10 @@ pdflatex -interaction=nonstopmode main.tex
 | Участник | GitHub | Файл черновика | Секции / задачи |
 |----------|--------|----------------|-----------------|
 | **Глеб** (координатор) | `@gleb7499` | `drafts/gleb_intro_scada.tex` | Introduction + History and background: from SCADA to AI-aided control systems; предложить версию Abstract/keywords. |
-| **Юра** | `@YURA_USERNAME` *(заполнить)* | `drafts/yura_standards.tex` | AI and standards + Problems and state of the art + описания ISA-88/95/5.1. |
-| **Дима** | `@DIMA_USERNAME` *(заполнить)* | `drafts/dima_neuro.tex` | Neurocontrol + Neuro-symbolic control + Examples (Kaspersky MLAD, Amazon, Unitree G1). |
-| **Женя** | `@ZHENYA_USERNAME` *(заполнить)* | `drafts/zhenya_plcnext_pid.tex` | PLCnext and AXC F 2152 + Developed Neuro-PID controller. |
-| **Давид** | `@DAVID_USERNAME` *(заполнить)* | `drafts/david_final.tex` | Завершающие секции: Examples of system operation, Integration, Use in control systems, Future development, Conclusion, Acknowledgment, русский abstract; **сборка/сверка библиографии** `bib/links.bib`. |
+| **Юра** | `@Yura-108` | `drafts/yura_standards.tex` | AI and standards + Problems and state of the art + описания ISA-88/95/5.1. |
+| **Дима** | `@DmitryRekun` | `drafts/dima_neuro.tex` | Neurocontrol + Neuro-symbolic control + Examples (Kaspersky MLAD, Amazon, Unitree G1). |
+| **Женя** | `@EuZireael` | `drafts/zhenya_plcnext_pid.tex` | PLCnext and AXC F 2152 + Developed Neuro-PID controller. |
+| **Давид** | `@Bidway` | `drafts/david_final.tex` | Завершающие секции: Examples of system operation, Integration, Use in control systems, Future development, Conclusion, Acknowledgment, русский abstract; **сборка/сверка библиографии** `bib/links.bib`. |
 
 **Давиду выделена самая маленькая текстовая часть** — основная его нагрузка это финальная редакция, перекрёстные ссылки и библиография.
 
@@ -149,7 +149,7 @@ gh pr create --title "[Юра] rewrite standards section" --body "- перефо
    - GitHub Actions workflow `.github/workflows/file-guard.yml` проверяет PR: если автор меняет чужой файл, проверка падает и merge блокируется.
    - Папка `figures/` — общая; в ней можно работать всем, но новые файлы должны иметь префикс автора.
 
-> **Сейчас CODEOWNERS и workflow используют плейсхолдеры для Юры, Димы, Жени и Давида.** Как только Глеб пришлёт их реальные GitHub-юзернеймы, я (Kimi Code) одной правкой включу жёсткую проверку по файлам.
+> **GitHub-юзернеймы всех участников заполнены, жёсткая проверка включена.** Если кто-то откроет PR с изменениями в чужом файле, workflow `file-guard` не пропустит merge.
 
 ---
 
@@ -169,6 +169,6 @@ gh pr create --title "[Юра] rewrite standards section" --body "- перефо
 
 - **Координатор:** Глеб (@gleb7499).
 - **Репозиторий:** `https://github.com/gleb7499/OSTIS-2026-neuro-symbolic-rework`
-- **После заполнения юзернеймов** включится полная защита файлов — см. `.github/CODEOWNERS` и `.github/workflows/file-guard.yml`.
+- **Полная защита файлов уже включена** — см. `.github/CODEOWNERS` и `.github/workflows/file-guard.yml`.
 
 Если что-то непонятно — пишите в issues репозитория или координатору.

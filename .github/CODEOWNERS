@@ -2,22 +2,21 @@
 # Заполните GitHub-юзернеймы Юры, Димы, Жени и Давида, затем раскомментируйте строки.
 # После этого GitHub будет автоматически запрашивать review у владельца измененного файла.
 
-# По умолчанию всем владеет координатор (Глеб) — до заполнения остальных владельцев.
+# По умолчанию всем владеет координатор (Глеб).
 * @gleb7499
 
 # Черновики участников
 /drafts/gleb_intro_scada.tex @gleb7499
-# /drafts/yura_standards.tex @YURA_USERNAME
-# /drafts/dima_neuro.tex @DIMA_USERNAME
-# /drafts/zhenya_plcnext_pid.tex @ZHENYA_USERNAME
-# /drafts/david_final.tex @DAVID_USERNAME
+/drafts/yura_standards.tex @Yura-108
+/drafts/dima_neuro.tex @DmitryRekun
+/drafts/zhenya_plcnext_pid.tex @EuZireael
+/drafts/david_final.tex @Bidway
 
-# Общая папка рисунков — все участники (раскомментируйте после заполнения юзернеймов)
-# /figures/ @gleb7499 @YURA_USERNAME @DIMA_USERNAME @ZHENYA_USERNAME @DAVID_USERNAME
+# Общая папка рисунков — все участники
+/figures/ @gleb7499 @Yura-108 @DmitryRekun @EuZireael @Bidway
 
 # Библиография ведется Давидом
-# /bib/links.bib @DAVID_USERNAME
-/bib/links.bib @gleb7499
+/bib/links.bib @Bidway
 
 # Служебные файлы — только координатор
 /README.md @gleb7499

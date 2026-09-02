@@ -1,6 +1,6 @@
 {
-  "_comment": "Заполните github-юзернеймы Юры, Димы, Жени и Давида и переведите strict в true, чтобы включить жесткую проверку.",
-  "strict": false,
+  "_comment": "Жесткая проверка включена. Каждый автор может менять только свой черновик, общие рисунки и свою зону ответственности (Давид — еще bib/links.bib).",
+  "strict": true,
   "authors": {
     "gleb7499": {
       "name": "Глеб",
@@ -16,6 +16,43 @@
         ".github/workflows/file-guard.yml",
         ".github/scripts/file-guard.py",
         ".github/file-guard-mapping.json"
+      ]
+    },
+    "Yura-108": {
+      "name": "Юра",
+      "prefix": "yura",
+      "allowed": [
+        "drafts/yura_standards.tex",
+        "figures/*",
+        "figures/**"
+      ]
+    },
+    "DmitryRekun": {
+      "name": "Дима",
+      "prefix": "dima",
+      "allowed": [
+        "drafts/dima_neuro.tex",
+        "figures/*",
+        "figures/**"
+      ]
+    },
+    "EuZireael": {
+      "name": "Женя",
+      "prefix": "zhenya",
+      "allowed": [
+        "drafts/zhenya_plcnext_pid.tex",
+        "figures/*",
+        "figures/**"
+      ]
+    },
+    "Bidway": {
+      "name": "Давид",
+      "prefix": "david",
+      "allowed": [
+        "drafts/david_final.tex",
+        "figures/*",
+        "figures/**",
+        "bib/links.bib"
       ]
     }
   }
