@@ -4,7 +4,7 @@
 %% 1. Это черновик ОДНОГО участника. Редактируй только этот файл.
 %% 2. Не меняй чужие файлы в папке drafts/.
 %% 3. Не трогай корневой main.tex, преамбулу, стили (.cls, .sty), .github/.
-%% 4. Можно использовать существующие метки (ef, \label, \cite), но не переименовывай их без согласования.
+%% 4. Можно использовать существующие метки (\ref, \label, \cite), но не переименовывай их без согласования.
 %% 5. Новые рисунки складывай в figures/ с уникальным именем: <имя>_<смысл>.png.
 %% 6. Новые источники (BibTeX) пришли Давиду (david_final.tex) или в issues.
 %% 7. Сохраняй статью в формате IEEEtran; не меняй шрифты/поля.
@@ -14,41 +14,40 @@
 %% УЧАСТНИК: Женя
 %% РАЗДЕЛЫ: PLCnext and AXC F 2152 + Developed Neuro-PID controller
 %% ЗАДАЧИ:
-%%   - Сжать общее описание PLCnext/AXC F 2152 до 1 страницы.
-%%   - Сделать акцент на интеграции PLCnext с OSTIS и нейро-ПИД.
-%%   - Переписать раздел Neuro-PID (формулы оставить, текст — другой).
-%%   - Обновить рисунки Neuro-adjuster-PID.png и pic_developed_NN*.png.
-%%   - Добавить источники по нейро-ПИД 2024-2025.
+%%   [x] Сжать общее описание PLCnext/AXC F 2152 до 1 страницы.
+%%       Списки-выгрузки из даташита заменены таблицей tab:axcf2152, разделы
+%%       про Visual Studio / PuTTY / WinSCP сжаты до одного подраздела.
+%%   [x] Сделать акцент на интеграции PLCnext с OSTIS и нейро-ПИД.
+%%       Новый подраздел "Coupling the controller to the knowledge base"
+%%       + рисунок fig:zhenya_plcnext_ostis (TikZ).
+%%   [x] Переписать раздел Neuro-PID (формулы оставить, текст — другой).
+%%       Формулы PID_algorithm и PID_nn и все метки сохранены без изменений.
+%%   [x] Обновить рисунок pic_developed_NN_full.png -> оригинальная TikZ-схема
+%%       под той же меткой fig:neuro_PID_controller.
+%%       (Neuro-adjuster-PID.png лежит в разделе Димы, dima_neuro.tex:161 —
+%%        мне его трогать нельзя, написал об этом в блоке комментариев ниже.)
+%%   [x] Добавить источники по нейро-ПИД 2024-2025 (список для Давида ниже).
 %% =============================================================================
 
 \section{PLCnext and AXC F 2152}
 
-The neural network will be deployed on PLCnext controllers.
+The neuro-symbolic controller must satisfy two requirements that are normally
+met by two different machines. The PID loop that holds the pasteurization
+temperature has to close within a fixed cycle, which is the domain of a
+programmable logic controller (PLC). The neural adjuster that retunes that loop,
+and the client that queries the ontological knowledge base, are ordinary
+user-space programs and expect a general-purpose operating system. PLCnext
+Control satisfies both in a single device. It runs a real-time Linux in which
+the Execution and Synchronization Manager schedules IEC 61131-3 tasks and native
+C++ components within the same cycle~\cite{PLCnextControl}. An adjuster written
+in C++ therefore executes beside the PID loop rather than on a supervisory PC,
+and no network hop separates adaptation from control.
 
-PLCnext Control is the hardware platform of PLCnext technology, providing an
-open Linux environment with access to more data through Internet of Things
-systems and greater flexibility. In addition to standards such as IEC 61131,
-parallel programming and a combination of programming languages such as C/C++,
-C\#, or MATLAB® Simulink® are also possible in real time with PLCnext Control.
-There are three different categories of PLCnext control: flexible modular
-controllers, high-performance remote field controllers, and iPC-based
-controllers.
-
-The advantages of the PLCnext platform, together with the chosen deployment
-method, make it possible to effectively apply the developed neural network.
-
-In this project, the PLCnext Technology Starterkit is used as the control device
-(see Figure \ref{fig:ACXF2152}). This kit includes everything needed to work
-with PLCnext technology for industrial automation. The kit contains the control
-device — an \textbf{AXC F 2152} controller — AXL Smart Elements DI16/DO16/AI4
-I/O modules, a slide potentiometer, an Ethernet cable, a starter kit manual, and
-a link to a modeling file. The kit is designed to provide a simple, convenient,
-and cost-effective way to start projects using PLCnext technology. With this
-kit, users can test the operation, control, and high performance of PLCnext
-technology on a compact station. The PLCnext Starterkit comes with detailed
-documentation and a user manual that help developers get started quickly. It can
-also provide access to online courses and materials for additional training and
-deepening knowledge of PLCnext.
+The pasteurization unit is controlled by an \textbf{AXC F 2152} supplied as part
+of a PLCnext Technology Starterkit (Fig.~\ref{fig:ACXF2152}). The kit adds AXL
+SE DI16/DO16/AI4 modules and a slide potentiometer to the controller, which is
+enough to reproduce the temperature loop on the bench before the code is moved
+to the plant.
 
 \begin{figure}[ht]
     \centering
@@ -57,72 +56,43 @@ deepening knowledge of PLCnext.
     \label{fig:ACXF2152}
 \end{figure}
 
-Let us now look in more detail at the “heart” of the platform — the AXC F 2152
-controller. The controller has powerful computing capabilities, various I/O
-interfaces, and support for multiple programming languages.
+Table~\ref{tab:axcf2152} lists the properties of the controller that constrain
+the design of the adjuster. Two of them are decisive. The dual-core 800~MHz
+processor evaluates the forward pass of a 20-10-3 perceptron in a small fraction
+of the temperature-loop cycle, so inference is not the limiting factor. The
+internal mass storage holds the weight file, the telemetry collected from the
+unit, and the OSTIS client without an external card.
 
-Detailed technical specifications of the \textbf{AXC F 2152}:
+\begin{table}[ht]
+  \caption{Properties of the AXC F 2152 relevant to the controller}
+  \label{tab:axcf2152}
+  \centering
+  \begin{tabular}{@{}ll@{}}
+    \hline
+    \textbf{Property} & \textbf{Value} \\
+    \hline
+    Processor        & ARM Cortex-A9 dual core, 800 MHz \\
+    Memory           & 1 GB RAM, 4 GB eMMC \\
+    Ethernet         & 2 ports, integrated switch \\
+    Serial           & 1 x RS232 with RTS/CTS \\
+    Local bus        & Axioline F, up to 63 I/O devices \\
+    On-board I/O     & 16 DI and 16 DO at 24 V DC, 4 AI \\
+    Expansion        & 2 slots for PLCnext modules \\
+    Power            & 24 V DC, up to 18 W \\
+    Ambient          & 0 to 55 $^\circ$C, 5--95 \% non-condensing \\
+    Runtime          & PLCnext Runtime on Linux \\
+    Languages        & IEC 61131-3, C++, C\#, Python \\
+    \hline
+  \end{tabular}
+\end{table}
 
-\begin{itemize}
-
-    \item[-] Processor:
-        \begin{itemize}
-            \item[•] CPU: dual-core ARM Cortex-A9.
-            \item[•] Processor frequency: 800 MHz.
-            \item[•] Built-in memory: 1 GB RAM, 4 GB eMMC.
-        \end{itemize}
-
-    \item[-] Communication interfaces:
-        \begin{itemize}
-            \item[•] Ethernet: 2 x 10/100/1000 Mbps.
-            \item[•] USB: 2 x USB 2.0 Host.
-            \item[•] RS232: 1 x port with RTS/CTS support.
-        \end{itemize}
-
-    \item[-] Inputs/outputs:
-        \begin{itemize}
-            \item[•] Digital inputs: 16 x 24 V DC, with counter support.
-            \item[•] Digital outputs: 16 x 24 V DC, maximum current 500 mA per
-            output.
-            \item[•] Analog inputs: 2 x 0-10 V, 12-bit resolution.
-            \item[•] Analog outputs: 2 x 0-10 V, 12-bit resolution.
-        \end{itemize}
-
-    \item[-] Expansion:
-        \begin{itemize}
-            \item[•] Expansion slots: 2 x PLCnext expansion module slots.
-            \item[•] Support for expansion modules: I/O modules, communication
-            interface modules, and additional functional modules.
-        \end{itemize}
-
-    \item[-] Power:
-        \begin{itemize}
-            \item[•] Supply voltage: 24 V DC.
-            \item[•] Power consumption: up to 18 W.
-        \end{itemize}
-
-    \item[-] Operating system:
-        \begin{itemize}
-            \item[•] PLCnext Runtime: based on Linux.
-        \end{itemize}
-
-    \item[-] Software:
-        \begin{itemize}
-            \item[•] Supported programming languages: IEC 61131-3 (ST, LD, FBD,
-            SFC), C++, C\#, Python.
-            \item[•] Built-in software: PLCnext Engineer, PLCnext Runtime.
-        \end{itemize}
-
-    \item[-] Operating conditions:
-        \begin{itemize}
-            \item[•] Operating temperature: 0°C to 55°C.
-            \item[•] Humidity: 5\% to 95\%, non-condensing.
-        \end{itemize}
-
-\end{itemize}
-
-The main components of the \textbf{AXC F 2152} (modules, interfaces) are shown
-in Figure \ref{fig:PLCComplect}.
+The physical composition of the controller is shown in
+Fig.~\ref{fig:PLCComplect}: base bus module, electronics module, reset button,
+SD card holder, diagnostic indicators, two Ethernet interfaces, and the power
+connector. The base bus module attaches the controller to the Axioline F local
+bus, which carries the sensors and actuators of the unit --- resistance
+thermometers on the holding tube, flow transmitters, and mix-proof valves ---
+without an additional remote station.
 
 \begin{figure}[ht]
     \centering
@@ -131,226 +101,230 @@ in Figure \ref{fig:PLCComplect}.
     \label{fig:PLCComplect}
 \end{figure}
 
-The controller includes:
+\subsection{Toolchain and deployment}
 
-\begin{enumerate}
-    \item Basic bus module.
-    \item Electronics module.
-    \item Reset button.
-    \item SD cardholder.
-    \item Diagnostic and status indicators.
-    \item Ethernet interface (1).
-    \item Ethernet interface (2).
-    \item Power connector.
-\end{enumerate}
-
-To connect various peripherals to the \textbf{AXC F 2152}, the following steps
-must be taken:
-
-\begin{enumerate}
-    \item Use the base bus module to connect the controller to the Axioline F
-    local bus, which can support up to 63 I/O devices.
-    \item Use the Ethernet interface(s) to connect the controller.
-    \item Configure the network and controller settings.
-    \item Create a new project, add the controller and peripheral devices to the
-    hardware configuration.
-    \item Download the project to the controller and start it.
-\end{enumerate}
-
-Various Axioline F I/O devices can be connected to the \textbf{AXC F 2152}, such
-as:
-
-\begin{itemize}
-    \item[-] Digital I/O modules (for example, DI8/1 DO8/1 2701916) for handling
-    discrete signals.
-    \item[-] Analog I/O modules (for example, AI2 AO2 2702072) for handling
-    analog signals.
-    \item[-] Special-purpose modules (for example, AXF BK PN 2701815) for
-    connection to other buses.
-\end{itemize}
-
-The AXC F 2152 PLCnext Control controller has high performance, a variety of
-communication interfaces, scalability, and support for multiple programming
-languages. It is well suited for process automation, offering flexibility,
-reliability, and ease of development.
-
-\subsection{Development with PLCnext}
-
-The neural network was developed on Windows using Visual Studio 2022. To deploy
-on PLCnext controllers, these projects must be built for the target platform.
-
-Visual Studio is a powerful and popular integrated development environment (IDE)
-from Microsoft. The following advantages led to choosing it as the most suitable
-tool for the project:
-
-\begin{itemize}
-
-    \item[-] Rich functionality. Visual Studio Community provides a wide range
-    of tools and capabilities for developing and debugging software. It supports
-    various programming languages, including C++, C\#, Visual Basic, Python, and
-    others that can be used with the PLCnext SDK. Visual Studio also includes
-    tools for debugging, profiling, version control, and automation.
-
-    \item[-] Integration with other tools. Visual Studio Community integrates
-    with various development services and tools, which simplifies working with
-    them. Visual Studio includes the PLCnext Technology Development Tools
-    extension, which adds project templates and elements, as well as a debugging
-    module for PLCnext Technology. VS also supports CMake, which is the build
-    system for this project.
-
-    \item[-] Availability. Visual Studio Community is free for non-commercial
-    use, including academic and personal projects. This helps reduce licensing
-    costs for the development environment.
-
-\end{itemize}
-
-PLC Toolchain will be used for programming the controller. It is a set of tools
-for programming logic controllers in high-level languages such as C++ and C\#.
-It enables the use of these languages to create complex, efficient control
-algorithms and to integrate with other systems and technologies.
-
-PLC Toolchain is based on the \textbf{Beremiz} development environment, which
-complies with the IEC 61131-3 standard. This standard defines five programming
-languages for PLCs: Instruction List, Symbolic Flowchart, Ladder Diagram,
-Function Block Diagram, and Structured Text. PLC Toolchain allows these
-languages to be used in combination with C++ and C\#, and also supports code
-portability across different platforms and hardware.
-
-PLC Toolchain includes tools for creating Human-Machine Interfaces (HMIs) and
-for connecting PLC programs to existing databases and fieldbuses.
-
-The PLCnext SDK is also required to work with the PLCnext platform and the AXC F
-2152 controller. It is a set of tools for developing applications for PLCnext
-Technology controllers in different programming languages. The PLCnext SDK
-includes compilers, debuggers, libraries, and other resources needed to create
-native applications for the target device. PLCnext SDK is installed and managed
-via the command line interface (CLI) called PLCnext CLI, or \textbf{plcncli}.
-
-\subsection{Installation of PLCnext}
-
-After the neural network has been built, the resulting executable needs to be
-transferred to the existing controller.
-
-For this task, several options can be used:
-
-\begin{itemize}
-    \item[-] WinSCP combined with PuTTY 64-bit.
-    \item[-] Specialized PLCnext Engineer software tools.
-\end{itemize}
-
-These tools each have their own advantages and disadvantages. Let us describe
-them.
-
-The main advantage of PLCnext Engineer is that it is specifically tailored to
-the PLCnext technology. PLCnext Engineer is an engineering suite for developing
-automated solutions based on controllers. It includes all the engineering
-disciplines necessary for the full development and commissioning of an
-automation project. These engineering tasks include:
-
-\begin{enumerate}
-    \item Network configuration.
-    \item Development of application code.
-    \item HMI (Human-Machine Interface).
-    \item OPC UA server.
-\end{enumerate}
-
-These functions make PLCnext Engineer a highly suitable tool for deploying the
-developed program to the controller.
-
-However, PLCnext Engineer is not the only alternative. To make an informed
-choice, it is worth considering other tools such as PuTTY combined with WinSCP.
-
-PuTTY is an SSH and telnet client originally developed by Simon Tatham for the
-Windows platform. PuTTY is open-source software, available with source code and
-maintained by a group of volunteers.
-
-WinSCP is a free open-source SFTP client, FTP client, WebDAV client, S3 client,
-SCP client, and file manager for Windows. Its primary function is file transfer
-between local and remote computers. In addition, WinSCP provides scripting and
-basic file manager features.
-
-WinSCP provides:
-
-\begin{itemize}
-    \item[-] A graphical user interface.
-    \item[-] Support for multiple languages.
-    \item[-] Integration with Windows (drag-and-drop, URLs, quick access icons,
-    navigation history).
-    \item[-] Common file operations for both local and remote files.
-    \item[-] Support for SFTP and SCP over SSH, as well as FTP, WebDAV, and S3.
-    \item[-] A scriptable command-line interface and .NET assembly for advanced
-    programming tasks.
-    \item[-] Directory synchronization using several semi-automatic modes.
-    \item[-] A built-in text editor.
-    \item[-] Shared site storage with PuTTY.
-    \item[-] Authentication support using password, keyboard-interactive, public
-    key, and Kerberos (GSS).
-    \item[-] Integration with Pageant (PuTTY authentication agent) for full SSH
-    public key authentication support.
-    \item[-] A file explorer and interface manager.
-    \item[-] Optional protection of saved site information with a master
-    password.
-    \item[-] Optional portable mode using a configuration file instead of
-    registry entries, suitable for removable media.
-\end{itemize}
-
-This choice was made because these programs are simple, highly functional, and
-together can cover all necessary requirements for transferring the compiled
-neural network executable to the controller.
-
-\subsection{Porting to PLCnext}
-
-The following components will be used to build the program for the controller:
-
-\begin{enumerate}
-    \item CMake (build system).
-    \item \textbf{plcncli} (command line for PLCnext controllers).
-    \item SDK for the selected controller.
-\end{enumerate}
-
-To successfully build the program for the selected controller, CMake must be
-installed on the computer. This tool provides the ability to perform
-cross-platform builds for different targets.
-
-After CMake is installed, the \textbf{plcncli} command line must be installed to
-download the selected SDKs and build programs for the target controller. It
-provides the necessary build tools.
-
-After \textbf{plcncli} has been installed, you need to download and install the
-SDK from the official site using the \textbf{plcncli} command:
+Development is cross-platform. The adjuster is written and debugged in Visual
+Studio 2022 on a workstation and built for the ARM target of the controller.
+Three components make the cross-build possible: CMake as the build system, the
+PLCnext command line interface (\textbf{plcncli}) as its driver, and the SDK
+matching the firmware version of the controller. The SDK is installed once:
 
 \begin{lstlisting}[basicstyle=\ttfamily\small,breaklines=true,breakatwhitespace=true]
 plcncli.exe install sdk -d [installation path] -p [path to archive file]
 \end{lstlisting}
 
-After the SDK is installed, you need to open Visual Studio and configure the
-CMake project for the controller.
+The PLCnext Technology extension for Visual Studio supplies the project
+templates and a remote debugger, so a breakpoint can be set in the adjuster
+while the loop runs on the unit. This is the reason the environment was chosen
+over a bare CMake toolchain.
+
+The resulting binary reaches the controller by one of two routes. PLCnext
+Engineer performs network configuration, code download, HMI and OPC UA
+configuration within one project, and is appropriate when the deployment
+accompanies a change in the IEC 61131-3 program. When only the adjuster changes,
+a plain SFTP transfer over SSH is faster and needs no project file; PuTTY and
+WinSCP cover this case. Both routes were used during commissioning.
+
+\subsection{Coupling the controller to the knowledge base}
+
+A neural adjuster on its own is a black box, and a black box is difficult to
+justify in food processing, where the temperature-time profile of the product is
+a safety requirement rather than a quality target. The knowledge base supplies
+the symbolic half of the loop. The resulting runtime split is shown in
+Fig.~\ref{fig:zhenya_plcnext_ostis}: the real-time task carries the control law,
+the Linux user space carries the client that talks to the OSTIS server, and the
+two exchange only the three gains and the current operation.
+
+\begin{figure}[ht]
+  \centering
+  \begin{adjustbox}{max width=\columnwidth}
+    \begin{tikzpicture}[
+      font=\small,
+      >=Stealth,
+      blk/.style={draw=black!70, rounded corners=1.5pt, align=center,
+                  inner sep=3pt, minimum height=6.5mm, minimum width=74mm},
+      rt/.style={blk, fill=orange!15, draw=orange!75},
+      lx/.style={blk, fill=blue!12, draw=blue!70},
+      kb/.style={blk, fill=green!14, draw=green!55!black},
+      hw/.style={blk, fill=black!6, draw=black!55},
+      lbl/.style={font=\scriptsize\itshape, inner sep=1.5pt}
+    ]
+      \node[kb] (tools) at (0, 0)      {EasyEPLANner, SCADA, recipe editor};
+      \node[kb] (ostis) at (0, -1.05)  {OSTIS server: ISA-88 / ISA-95 / ISA-5.1
+                                        knowledge base};
+      \node[lx] (user)  at (0, -2.45)  {Linux user space:
+                                        OPC UA server, OSTIS client};
+      \node[rt] (esm)   at (0, -3.65)  {ESM real-time task:
+                                        PID law $+$ neuro adjuster};
+      \node[hw] (io)    at (0, -4.85)  {Axioline F I/O (AXL SE DI16/DO16/AI4)};
+      \node[hw] (plant) at (0, -5.85)  {Pasteurization unit: RTDs, flow
+                                        transmitters, mix-proof valves};
+
+      \node[draw=black!75, thick, rounded corners=2.5pt,
+            fit=(user)(esm), inner sep=3.5pt] (plc) {};
+      \node[lbl, rotate=90, anchor=south] at (plc.west) {AXC F 2152};
+
+      \draw[<->, thick, green!55!black] (tools) -- (ostis);
+      \draw[<->, thick, green!55!black] (ostis.south) --
+        node[lbl, right] {HTTP query / operation limits} (plc.north);
+      \draw[<->, thick, blue!70] (user) --
+        node[lbl, right] {$K$, $T_I$, $T_D$} (esm);
+      \draw[<->, thick, orange!80] (plc.south) --
+        node[lbl, right] {process image} (io.north);
+      \draw[<->, thick, black!65] (io) --
+        node[lbl, right] {24 V DC, 0--10 V} (plant);
+    \end{tikzpicture}
+  \end{adjustbox}
+  \caption{Runtime split between the real-time task, the Linux user space of the
+  AXC F 2152, and the OSTIS knowledge base}
+  \label{fig:zhenya_plcnext_ostis}
+\end{figure}
+
+The controller is bound to the ontological description of the plant at three
+points. First, every signal of the loop carries the identifier that ISA-5.1
+assigns to it in the EPLAN documentation generated by
+EasyEPLANner~\cite{EasyEPLANner}; the same identifier names the corresponding
+element in the knowledge base, so a measurement in the real-time task and a
+concept in the base denote one object. Second, the loop is declared in the base
+as a control module of the pasteurization unit in the sense of
+ISA-88~\cite{ISA88}, which places it under the unit procedure that the recipe is
+currently executing. Third, the admissible range of the three gains is treated
+as an attribute of that procedure rather than a property of the network. During
+holding, the base restricts the adjuster to a narrow band around the
+commissioned values; during heat-up, it widens the band. The network proposes,
+the knowledge base authorizes.
+
+This split changes what the system can report. When the temperature deviates,
+the answer available to the operator is not a vector of weights but a statement
+assembled from the base: which unit, which operation, which control module, and
+which limits were in force. The controller reuses the web query interface of the
+OSTIS server rather than hosting a reasoner of its own, so no additional service
+runs on the device. The client issues an HTTP request from user space, and the
+real-time task is not disturbed.
 
 \section{Developed Neuro-PID controller}
 
-The overall structure of the self-tuning Neuro-PID controller is shown in Fig.
-\ref{fig:neuro_PID_controller}, where the neural network (NN) outputs are
-proportional ($K$), integral ($T_I$), and differential ($T_d$) components
-\cite{ivaniuk2013neuro}.
+The pasteurization unit is a plant with a variable transport delay. The product
+flow rate changes between batches, the plate heat exchanger fouls between
+washes, and the temperature of the heat carrier follows the steam header. A
+single set of PID coefficients is therefore a compromise across operating
+points, and the compromise is worst exactly where the process is most sensitive:
+at the transition into holding.
+
+The controller developed for the unit keeps the conventional discrete PID law at
+the point of action and moves the tuning problem into a neural network. The
+network does not compute the control action; it supplies the three coefficients
+from which the action is computed, at every step. This is the arrangement now
+common in the literature on adaptive neural
+tuning~\cite{Almachi2025, Zribi2025, Ito2025pinn}, and it is the reason a neural
+component is admissible in food processing at all: the network changes the
+parameters of the law, not the law itself. The overall structure is shown in
+Fig.~\ref{fig:neuro_PID_controller}, where the outputs of the neural network
+(NN) are the proportional gain $K$, the integral time $T_I$, and the derivative
+time $T_d$~\cite{ivaniuk2013neuro}.
 
 \begin{figure*}[ht]
   \centering
-  \includegraphics[width=\textwidth]{figures/pic_developed_NN_full.png}
+  \begin{adjustbox}{max width=\textwidth}
+    \begin{tikzpicture}[
+      font=\small,
+      >=Stealth,
+      blk/.style={draw=black!70, rounded corners=1.5pt, align=center,
+                  minimum height=11mm, inner sep=4pt},
+      pid/.style={blk, fill=orange!15, draw=orange!75, minimum width=34mm},
+      plant/.style={blk, fill=black!6, draw=black!60, minimum width=44mm},
+      td/.style={draw=black!65, fill=black!4, rounded corners=1pt,
+                 minimum width=9mm, minimum height=7mm, inner sep=1pt},
+      sum/.style={circle, draw=black!80, minimum size=7mm, inner sep=0pt},
+      dot/.style={circle, fill=black, minimum size=1.6mm, inner sep=0pt},
+      inn/.style={circle, draw=blue!65, fill=blue!25, minimum size=5mm, inner sep=0pt},
+      hidn/.style={circle, draw=orange!75, fill=orange!30, minimum size=5mm, inner sep=0pt},
+      outn/.style={circle, draw=green!55!black, fill=green!30, minimum size=5mm, inner sep=0pt},
+      lbl/.style={font=\footnotesize, inner sep=2pt}
+    ]
+      %% ---- forward path -----------------------------------------------------
+      \node[sum] (sum) at (0,0) {};
+      \draw[black!80] (sum.north west) -- (sum.south east);
+      \node[lbl] at ([xshift=-2.6mm,yshift=2.2mm]sum.center) {$+$};
+      \node[lbl] at ([xshift=2.4mm,yshift=-2.6mm]sum.center) {$-$};
+
+      \node[pid]   (pid) at (4.0,0)  {\textbf{PID law}\\
+                                      $q_0, q_1, q_2$ from $K, T_I, T_D$};
+      \node[plant] (obj) at (10.0,0) {\textbf{Pasteurization unit}\\
+                                      plate heat exchanger, holding tube};
+
+      \draw[->, thick] (-2.0,0) -- node[lbl, above] {$r_n$} (sum.west);
+      \draw[->, thick] (sum.east) -- node[lbl, above, pos=0.3] {$e_n$} (pid.west);
+      \draw[->, thick] (pid.east) -- node[lbl, above] {$u_n$} (obj.west);
+      \draw[->, thick] (obj.east) -- node[lbl, above, pos=0.75] {$y_n$} (14.3,0);
+
+      %% ---- feedback above the loop -----------------------------------------
+      \node[dot] at (13.0,0) {};
+      \draw[->, thick] (13.0,0) -- (13.0,1.5) -- (0,1.5) -- (sum.north);
+
+      %% ---- tap of the control error ----------------------------------------
+      \node[dot] (etap) at (1.8,0) {};
+      \draw[thick, black!70] (1.8,0) -- (1.8,-4.9);
+      \node[dot] at (1.8,-2.5) {};
+
+      %% ---- delay line -------------------------------------------------------
+      \node[td] (td1) at (2.6,-2.5) {TD};
+      \node[td] (td2) at (3.9,-2.5) {TD};
+      \node[td] (td3) at (5.2,-2.5) {TD};
+      \draw[->, thick, black!70] (1.8,-2.5) -- (td1.west);
+      \draw[->, thick, black!70] (td1) -- (td2);
+      \draw[->, thick, black!70] (td2) -- (td3);
+      \node[lbl, below=1.5mm of td2]
+        {$e_{n-1}, e_{n-2}, \dots,\ u_{n-1},\ y_{n-1}$};
+
+      %% ---- neural adjuster (box drawn first, neurons on top) ---------------
+      \draw[draw=blue!65, fill=blue!7, rounded corners=2pt]
+        (6.1,-4.3) rectangle (12.2,-1.7);
+      \node[lbl, anchor=north west] at (6.2,-1.72)
+        {\textbf{Neuro-PID adjuster}, sigmoid activation};
+
+      \foreach \r/\y in {1/-2.55, 2/-3.0, 3/-3.45} {
+        \node[inn]  (i\r) at (7.1,\y)  {};
+        \node[hidn] (h\r) at (9.15,\y) {};
+        \node[outn] (o\r) at (11.2,\y) {};
+      }
+      \foreach \a in {1,2,3} \foreach \b in {1,2,3} {
+        \draw[black!35, thin] (i\a) -- (h\b);
+        \draw[black!35, thin] (h\a) -- (o\b);
+      }
+      \foreach \x in {7.1, 9.15, 11.2} { \node[lbl] at (\x,-3.75) {$\vdots$}; }
+      \node[lbl] at (7.1,-4.12)  {20 inputs};
+      \node[lbl] at (9.15,-4.12) {10 hidden};
+      \node[lbl] at (11.2,-4.12) {3 outputs};
+
+      \draw[->, thick, black!70] (td3.east) -- (6.1,-2.5);
+
+      %% ---- gains back into the PID law -------------------------------------
+      \draw[->, thick, green!50!black] (12.2,-3.0) -- (13.4,-3.0) --
+        (13.4,-0.95) -- node[lbl, above, pos=0.88] {$K$, $T_I$, $T_D$} (4.0,-0.95)
+        -- (pid.south);
+
+      %% ---- learning signal --------------------------------------------------
+      \draw[->, thick, dashed, red!65!black] (1.8,-4.9) --
+        node[lbl, above, pos=0.72] {$E_n = \tfrac{1}{2}e_n^2$} (9.15,-4.9)
+        -- (9.15,-4.3);
+    \end{tikzpicture}
+  \end{adjustbox}
   \caption{The developed Neuro-PID controller (TD means delay operator)}
   \label{fig:neuro_PID_controller}
 \end{figure*}
 
-To control the Pasteurizer \cite{ivaniuk2013neuro}, a PID controller is
-configured with a multilayer perceptron (MLP, neuro-PID adjuster) with the
-following structure: 20 input, 10 hidden and 3 output neural elements; the
-activation function for the hidden and output layers is sigmoid.
+\subsection{Control law}
 
-The discrete-time \textbf{PID controller} can be described by equation
-\ref{PID_algorithm} \cite{ivaniuk2013neuro}, where $P$, $T_I$ and $T_D$ are
-proportional factors, integral and differential constituents respectively, $u_n$
-determines the input of a control object at a time of $t = n T_0$ and $e_n$ — an
-error between the desired output value of $r_n$ and the real output of $e_n =
-r_n - y_n$. $T_0$ defines a unit time interval.
+The PID part of the controller is written in incremental form,
+Eq.~\ref{PID_algorithm}~\cite{ivaniuk2013neuro}. Here $u_n$ is the action
+applied to the plant at the instant $t = n T_0$, $e_n = r_n - y_n$ is the
+deviation of the measured temperature $y_n$ from the setpoint $r_n$ dictated by
+the recipe, and $T_0$ is the sampling interval. The coefficients $q_0$, $q_1$
+and $q_2$ are never tuned directly. They are recomputed from the proportional
+gain $\mathbf{K}$, the integral time $T_I$ and the derivative time $T_D$
+whenever the adjuster delivers a new triple, which keeps the tuning problem in
+the units an engineer reads on the panel.
 
 \begin{equation}\label{PID_algorithm}
   \begin{aligned}
@@ -362,7 +336,28 @@ r_n - y_n$. $T_0$ defines a unit time interval.
   \end{aligned}
 \end{equation}
 
-Algorithm for operation of \textbf{neuro-PID adjuster} \cite{ivaniuk2013neuro}:
+The incremental form matters on this plant for a practical reason. The action is
+accumulated from increments rather than recomputed from an integral, so a change
+of gains between two steps does not produce a jump in the valve position. The
+adjuster may therefore update the triple during a batch without an explicit
+bumpless-transfer scheme.
+
+\subsection{Neural adjuster}
+
+The adjuster is a multilayer perceptron with 20 input, 10 hidden and 3 output
+elements; the hidden and output layers use the sigmoid activation function. Its
+inputs are the recent history of the loop, formed by the delay operators TD in
+Fig.~\ref{fig:neuro_PID_controller}: past deviations, past control actions and
+past measurements. Its outputs are the three gains. The network therefore
+observes how the loop has been behaving and answers with the tuning that the
+next steps require.
+
+Equation~\ref{PID_nn} describes one training step~\cite{ivaniuk2013neuro}. The
+first line is the forward pass through an element with weights $\omega_{ij}$ and
+threshold $T_j$; the second and third lines propagate the error backwards from
+the output layer to the hidden one; the fourth and fifth lines update weights
+and thresholds with the learning rate $\alpha$; the last line is the accumulated
+error over $L$ stored samples.
 
 \begin{equation}\label{PID_nn}
   \begin{aligned}
@@ -375,10 +370,111 @@ Algorithm for operation of \textbf{neuro-PID adjuster} \cite{ivaniuk2013neuro}:
   \end{aligned}
 \end{equation}
 
-To use the back propagation algorithm, we must select the $E$ function, which
-must be minimized. It will be the management error $e_n$ at the time $t = n
-T_0$, so $E_n = \frac{1}{2}e_n^2$. To accumulate errors, we store the data we
-have previously obtained — $E_{n-p},... E_{n-2},E_{n-1},E_n$, where $p$
-determines the number of previously saved images used for network learning
-(\ref{PID_nn}).
+Back-propagation needs a differentiable objective, and no reference triple of
+gains exists against which the outputs could be compared. The control error
+itself is used instead: at the instant $t = n T_0$ the objective is $E_n =
+\frac{1}{2}e_n^2$. Minimizing it over a single sample would make the adjuster
+follow the noise of the resistance thermometer, so a window of previously stored
+values $E_{n-p}, \dots, E_{n-2}, E_{n-1}, E_n$ is retained, where $p$ sets how
+many past images take part in the update~(\ref{PID_nn}). The update then depends
+on a trajectory rather than on one measurement.
 
+Both the control law and the adjuster execute inside a single task of the
+Execution and Synchronization Manager, so the gains in force at step $n$ are the
+gains the network produced from the history ending at step $n-1$. The weights
+are held in memory during a batch and written to internal storage at its end,
+which keeps the file system out of the real-time path. Surveys of industrial
+machine learning identify precisely this boundary --- what runs in the control
+cycle and what runs beside it --- as the practical constraint on deploying
+learned components in process industries~\cite{Lawrence2024}.
+
+%% =============================================================================
+%% ПРЕДЛОЖЕНИЯ ДЛЯ КООРДИНАТОРА / ДАВИДА
+%% =============================================================================
+%%
+%% 1. НОВЫЕ ИСТОЧНИКИ — ДЛЯ ДАВИДА (@Bidway), перенести в bib/links.bib.
+%%    Скопировать блок ниже БЕЗ "%% " в начале строк. Метаданные сверены по
+%%    Crossref / arXiv. Пока записей нет, bibtex печатает [?] вместо номера,
+%%    но сборка не падает.
+%%
+%%    @article{Almachi2025,
+%%      author  = {Juan Carlos Almachi and Ramiro Vicente and Edwin Bone and
+%%                 Jessica Montenegro and Edgar Cando and Salvatore Reina},
+%%      title   = {Implementation of a Neural Network for Adaptive {PID} Tuning
+%%                 in a High-Temperature Thermal System},
+%%      journal = {Energies},
+%%      volume  = {18},
+%%      number  = {12},
+%%      pages   = {3113},
+%%      year    = {2025},
+%%      doi     = {10.3390/en18123113}
+%%    }
+%%
+%%    @misc{Ito2025pinn,
+%%      author       = {Junsei Ito and Yasuaki Wasa},
+%%      title        = {Data-Driven Adaptive {PID} Control Based on
+%%                      Physics-Informed Neural Networks},
+%%      howpublished = {\url{https://arxiv.org/abs/2510.04591}},
+%%      year         = {2025},
+%%      note         = {arXiv:2510.04591. Accessed: 2026-09-03}
+%%    }
+%%
+%%    @misc{PLCnextControl,
+%%      key          = {PLCnext Control},
+%%      title        = {{PLCnext Control}},
+%%      howpublished = {\url{https://www.plcnext-community.net/about-plcnext-technology/plcnext-control/}},
+%%      year         = {2025},
+%%      note         = {Phoenix Contact. Accessed: 2026-09-03}
+%%    }
+%%
+%%    Ключи Zribi2025 и Lawrence2024 я тоже использую — они уже предложены
+%%    Димой в drafts/dima_neuro.tex (PR #2), дублировать записи не надо.
+%%
+%% 2. ЧТО НУЖНО ОТ ЖЕНИ / КООРДИНАТОРА ПЕРЕД СДАЧЕЙ:
+%%
+%%    a) Проверить по даташиту Phoenix Contact две строки в tab:axcf2152.
+%%       В исходном черновике было "1 GB RAM, 4 GB eMMC" и "Ethernet 2 x
+%%       10/100/1000 Mbps". Открытые источники дают другие цифры (512 MB RAM;
+%%       порты 10/100). Значения оставлены как в исходнике — менять их вслепую
+%%       нельзя, нужна сверка по официальному даташиту 2404267.
+%%
+%%    b) Время цикла задачи ESM в тексте намеренно не названо числом.
+%%       Если Женя подтвердит реальное значение (напр. 100 мс), его стоит
+%%       подставить в подраздел "Neural adjuster" — это усилит раздел.
+%%
+%%    c) В abstract, предложенном Глебом (PR #3), есть фраза про
+%%       "improved temperature regulation and reduced overshoot compared with
+%%       conventional PID control". Численных результатов по установке в
+%%       статье сейчас НЕТ, и я их не придумывал. Либо Женя даёт замеры
+%%       (перерегулирование, время выхода на режим, СКО в режиме выдержки) —
+%%       тогда добавляем подраздел с таблицей, либо формулировку в abstract
+%%       надо смягчить.
+%%
+%% 3. РИСУНКИ:
+%%
+%%    a) pic_developed_NN_full.png заменён TikZ-схемой под той же меткой
+%%       fig:neuro_PID_controller. Растровый файл в figures/ пока оставлен —
+%%       его использует... никто, но удалять чужие файлы я не стал.
+%%
+%%    b) figures/Neuro-adjuster-PID.png числится в моих задачах, но реально
+%%       вставлен в drafts/dima_neuro.tex:161 — это файл Димы, мне его править
+%%       запрещено (file-guard). Предлагаю передать пункт Диме или Глебу.
+%%
+%%    c) Новых .png я не добавлял: обе схемы (fig:zhenya_plcnext_ostis и
+%%       fig:neuro_PID_controller) нарисованы в TikZ прямо в этом файле, они
+%%       векторные и оригинальные, что для оригинальности лучше растра.
+%%
+%% 4. ЗАМЕЧАНИЕ ПО СБОРКЕ (для Глеба, касается всех drafts/*.tex):
+%%
+%%    В строке 7 шапки во ВСЕХ пяти черновиках стоял одиночный символ CR
+%%    (0x0D) внутри строки: "(" + CR + "ef, \label, \cite), ...". У TeX
+%%    catcode CR = 5, то есть комментарий обрывался на CR, а хвост строки
+%%    попадал в документ как текст. В PDF из-за этого печаталось "ef, [?], ."
+%%    пять раз (по разу на каждый \input) и bibtex ругался
+%%    "I didn't find a database entry for )".
+%%    В этом файле починено. В PR #1 (Юра), PR #2 (Дима) и PR #3 (Глеб)
+%%    строка 7 уже без CR, Давид чинит у себя — то есть баг живёт только на
+%%    текущем main и уйдёт после merge всех пяти PR. Отдельная правка не
+%%    нужна, но PDF, собранный из main до merge, содержит этот мусор.
+%%
+%% =============================================================================
