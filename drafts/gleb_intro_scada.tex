@@ -32,7 +32,9 @@ deviations can compromise product quality or trigger batch rejection
 and displaying alarms to operators. However, the control logic inside a
 programmable logic controller (PLC) and the tuning parameters of PID loops often
 remain opaque to plant personnel. Each level resembles a black box: inputs and
-outputs are visible, while the internal algorithm is hidden. A neural network,
+outputs are visible, while the internal algorithm is hidden.
+
+A neural network (NN),
 for instance, can be represented as such a black box
 (Fig.~\ref{fig:black_nn}), yet the underlying decision rules are crucial for
 safe operation.
@@ -41,7 +43,7 @@ This paper builds upon the ideas discussed in
 \cite{ivaniuk2025neurosymbolic,ivaniuk2024neurosemantic,Lutska2022,Taberko2020,
 Golovko2018integration} and reviews current challenges and tools for developing
 and applying industrial standards alongside modern techniques such as
-neuro-control, \textbf{neuro-symbolic AI}, and semantic technologies. The main
+neuro-control, \emph{neuro-symbolic AI}, and semantic technologies. The main
 focus is on standards-related problems and their relevance to today's control
 systems. A symbolic neurocontroller is presented as a promising approach for
 controlling complex industrial processes such as pasteurization by combining the
@@ -113,12 +115,6 @@ strengths of symbolic and neural methods.
   \label{fig:black_nn}
 \end{figure}
 
-\begin{figure}[ht]
-  \centering
-  \includegraphics[width=0.95\columnwidth]{figures/gleb_pasteurizer_hmi.png}
-  \caption{SCADA human-machine interface of the pasteurization unit at JSC ``Savushkin Product''. The interface displays the four process stages---filling (T101, V101--V102), heating (T201, V201), cooling (T301, V301), and dispensing (T401, V401)---with real-time sensor readings, batch timer, and process parameters (flow rate 1200~L/h, pressure 2.4~bar, heat carrier 75~$^\circ$C).}
-  \label{fig:pasteurizer_hmi}
-\end{figure}
 
 \section{History and background: from \texorpdfstring{\textbf{SCADA}}{SCADA} to
 \texorpdfstring{\textbf{AI-aided control systems}}{AI-aided control systems}}
@@ -128,7 +124,7 @@ backbone of modern industrial automation. From power generation and water
 treatment to food processing, SCADA platforms enable centralized monitoring of
 geographically distributed processes \cite{boyer2004scada,Mladen2022}. Their
 historical progression explains both current capabilities and the growing need
-for intelligent control in pasteurization.
+for intelligent control in pasteurization (Fig.~\ref{fig:scada_timeline}).
 
 \begin{figure}[ht]
   \centering
@@ -161,37 +157,6 @@ integration of heterogeneous vendor equipment remains difficult, and the
 introduction of machine learning adds opacity to already complex control loops
 \cite{Heidari2025}. These challenges motivate the neuro-symbolic approach
 explored in this paper.
-
-Table~\ref{tab:communication} summarizes the communication technologies that
-have shaped SCADA development, and Table~\ref{tab:hardware_evolution} traces
-the corresponding hardware evolution.
-
-\begin{table}[h]
-  \centering
-  \caption{Evolution of SCADA Communication Technologies}
-  \label{tab:communication}
-  \begin{tabular}{@{}lll@{}}
-    \textbf{Era} & \textbf{Technology} & \textbf{Characteristics} \\
-    1960s--1970s & Serial/Analog Radio & Point-to-point, low bandwidth \\
-    1980s--1990s & Digital Radio & Improved reliability, bandwidth \\
-    1990s--2000s & Ethernet, TCP/IP & Standard protocols, LAN/WAN \\
-    2000s--2010s & Wireless, Cellular & Mobile connectivity, flexibility \\
-    2010s--Present & IoT, 5G, OPC~UA & High bandwidth, semantic interoperability \\
-  \end{tabular}
-\end{table}
-
-\begin{table}[h]
-  \centering
-  \caption{Hardware Evolution of SCADA Systems}
-  \label{tab:hardware_evolution}
-  \begin{tabular}{@{}ll@{}}
-    \textbf{Era} & \textbf{Key hardware} \\
-    1960s--1970s & Mainframes, relay logic, basic RTUs \\
-    1980s--1990s & Minicomputers, PLCs \\
-    1990s--2000s & Industrial PCs, intelligent RTUs \\
-    2000s--Present & Edge devices, IoT sensors, distributed processing units \\
-  \end{tabular}
-\end{table}
 
 Several trends now shape the future of SCADA. Edge computing reduces latency by
 processing data near the source. Fifth-generation cellular networks enable
@@ -257,15 +222,6 @@ architectures, and experimental results presented in the following sections.
 %%
 %% 4. ПЛЕЙСХОЛДЕРЫ / ПРОМТЫ ДЛЯ ФОТОГРАФИЙ:
 %%
-%%    a) figures/gleb_pasteurizer_hmi.png  —  HMI-экран пастеризационной установки
-%%       ТИП: промт для GPT Image 2.0 (или Midjourney/DALL-E)
-%%       ПРОМТ: "Industrial HMI screen display for a dairy pasteurization unit.
-%%       Flat UI layout showing a process flow diagram with tanks, pipes, valves,
-%%       and temperature sensors. Color-coded status indicators: green for running,
-%%       blue for filling, gray for idle. Russian text labels: 'Наполнение',
-%%       'Подогрев', 'Охлаждение', 'Выдача'. A sidebar shows real-time temperature
-%%       72 C and batch timer 00:45:12. Light gray background, professional SCADA
-%%       software style, high resolution, photorealistic screenshot."
 %%
 %%    b) figures/gleb_pasteurizer_unit.jpg  —  фото реальной пастеризационной установки
 %%       ТИП: фото нужно сделать Глебу на производстве
