@@ -4,7 +4,7 @@
 %% 1. Это черновик ОДНОГО участника. Редактируй только этот файл.
 %% 2. Не меняй чужие файлы в папке drafts/.
 %% 3. Не трогай корневой main.tex, преамбулу, стили (.cls, .sty), .github/.
-%% 4. Можно использовать существующие метки (ef, \label, \cite), но не переименовывай их без согласования.
+%% 4. Можно использовать существующие метки (\ref, \label, \cite), но не переименовывай их без согласования.
 %% 5. Новые рисунки складывай в figures/ с уникальным именем: <имя>_<смысл>.png.
 %% 6. Новые источники (BibTeX) пришли Давиду (david_final.tex) или в issues.
 %% 7. Сохраняй статью в формате IEEEtran; не меняй шрифты/поля.
@@ -36,17 +36,17 @@ knowledge representation is performed by a graphical interface component.
 A standard system built on the basis of OSTIS Technology can be easily
 integrated with other systems in the workplace. To integrate
 \textit{\textbf{ISA-88}}, \textit{\textbf{ISA-95}} and \textit{\textbf{ISA-5.1}}
-standards system with other systems running on JSC "Savushkin Pro\-duct", a
-web-oriented approach is used — the OSTIS server is accessed with the use of the
+standards system with other systems running on JSC ``Savushkin Product'', a
+web-oriented approach is used --- the OSTIS server is accessed with the use of the
 following queries:
 
 \begin{lstlisting}[basicstyle=\small]
   http://industry.ostis.net?sys_id=unit
 \end{lstlisting}
 
-where "sys\_id=unit" defines a term (the name of an entity) whose value we want
-to find out (in this example, in fact, the answer to the question "What is a
-\textit{unit}?"). This approach makes it relatively easy to add support for the
+where ``sys\_id=unit'' defines a term (the name of an entity) whose value we want
+to find out (in this example, in fact, the answer to the question ``What is a
+\textit{unit}?''). This approach makes it relatively easy to add support for the
 knowledge base in current control systems projects; it is enough to indicate the
 names corresponding to the entities in the knowledge base within the control
 system.
@@ -60,7 +60,7 @@ Another example is the integrated help subsystem within corporate Add-in
 technological objects (Tank, Boiler, etc.), operations, and so on according to
 the \textit{\textbf{ISA-88}} standard. The UML-model of EasyEPLANner high-level
 objects can be described in OSTIS. The \textbf{PID controller} is at the lower
-level — the control module. It can be replaced by the development
+level --- the control module. It can be replaced by the development
 \textbf{Neuro-PID controller} with the connections to the units and other
 high-level objects.
 
@@ -70,12 +70,11 @@ It is very important to quickly and correctly react to different events during
 process control, especially critical accidents. However, when we have a complex
 distributed system, it is rather complicated and normally requires the help of a
 human operator. This may lead to a variety of problems. Thus, using an
-OSTIS-based system can help solve the issues described in Fig.
-\ref{OSTIS_in_control}. For example, Project \#2 has a valve failure but does
+OSTIS-based system can help solve the issues described in Fig.~ef{OSTIS_in_control}. For example, Project \#2 has a valve failure but does
 not know what to do. It makes a request to the OSTIS server, which already knows
 which projects also use this line (with this valve). The OSTIS server polls the
 rest of the projects (projects \#1 and \#2). Each project has information about
-which operations are currently active and provides an answer on what to do —
+which operations are currently active and provides an answer on what to do ---
 pause the operation, do nothing, etc. After that, the OSTIS server sends back to
 Project \#2 an answer with the resulting actions to be used. These actions are
 performed automatically, without the need for a human operator.
@@ -97,7 +96,7 @@ Current project issues can be found on GitHub (\cite{EasyServer_4_0},
     satisfaction.
   \item Continuously updating and refactoring ontological models (further
     formalization of missing concepts, fixing typos, etc.).
-  \item Enhancing PFC-visualization — not only displaying but also editing
+  \item Enhancing PFC-visualization --- not only displaying but also editing
     diagrams. Adding rich navigation between PFC-diagrams and corresponding text
     representations.
   \item Further formulation of typical questions to the system from the user and
@@ -107,11 +106,11 @@ Current project issues can be found on GitHub (\cite{EasyServer_4_0},
 \end{itemize}
 
 The implementation of answers to complex questions is necessary to make the work
-easier not only for process operators but also for maintenance personnel —
+easier not only for process operators but also for maintenance personnel ---
 instrumentation engineers, mechanics, electricians, etc. Therefore, it is
 planned to implement the system's answer to the following type of question: in
 what operations of which objects is this actuator used (for example, valve
-\textbf{"T1V1"}). This question is very important when a device failure occurs,
+\textbf{``T1V1''}). This question is very important when a device failure occurs,
 and it is necessary to determine the criticality of this situation. For
 analysis, it is necessary to compare the time of the accident and the history of
 operations. For example, a failure of the mix-proof valve during the line
