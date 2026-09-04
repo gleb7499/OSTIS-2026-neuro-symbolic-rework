@@ -4,179 +4,224 @@
 %% 1. Это черновик ОДНОГО участника. Редактируй только этот файл.
 %% 2. Не меняй чужие файлы в папке drafts/.
 %% 3. Не трогай корневой main.tex, преамбулу, стили (.cls, .sty), .github/.
-%% 4. Можно использовать существующие метки (ef, \label, \cite), но не переименовывай их без согласования.
+%% 4. Можно использовать существующие метки (\ref, \label, \cite), но не переименовывай их без согласования.
 %% 5. Новые рисунки складывай в figures/ с уникальным именем: <имя>_<смысл>.png.
 %% 6. Новые источники (BibTeX) пришли Давиду (david_final.tex) или в issues.
 %% 7. Сохраняй статью в формате IEEEtran; не меняй шрифты/поля.
 %% 8. После правки скинь файл координатору; сборка PDF делается в main.tex.
 %% =============================================================================
 
-%% УЧАСТНИК: Дима
+%% УЧАСТНИК: Дима (@DmitryRekun)
 %% РАЗДЕЛЫ: Neurocontrol + Neuro-symbolic control + Examples (Kaspersky MLAD, Amazon, Unitree G1)
-%% ЗАДАЧИ:
-%%   - Переписать Neurocontrol с опорой на свежие обзоры 2024-2025.
-%%   - Заменить пример с "яблоком" на промышленный пример (пастеризация).
-%%   - Обновить схему классификации нейроуправления и "чёрный ящик".
-%%   - Доработать/сократить примеры Kaspersky/Amazon/Unitree, добавить свежие цитаты.
+%%
+%% ЧТО СДЕЛАНО В ЭТОЙ РЕДАКЦИИ:
+%%   - Neurocontrol переписан с опорой на обзоры 2024-2025 (Lawrence2024, Park2025rl).
+%%   - Пример с "яблоком" заменён на промышленный пример (пастеризационная установка).
+%%   - Схема классификации нейроуправления перерисована (диаграмма Венна из трёх
+%%     свойств: approximation / optimization / adaptation) + добавлена таблица
+%%     tab:neurocontrol_schemes с привязкой каждой схемы к установке.
+%%   - Рисунок fig:pid_controller перенесён в раздел Neurocontrol (он показывает
+%%     именно схему с самонастройкой) и получил корректную подпись; МЕТКА НЕ
+%%     ПЕРЕИМЕНОВАНА.
+%%   - Шесть детекторов Kaspersky MLAD свёрнуты из шести абзацев в таблицу
+%%     tab:mlad_detectors; добавлены технические факты из Kaspersky ICS CERT.
+%%   - Amazon: убрана публицистика про ChatGPT, добавлены проверяемые факты
+%%     (Automated Reasoning checks GA 08.2025, Vulcan, Automated Reasoning CFP).
+%%   - Unitree G1: сокращено, добавлены реальные характеристики платформы и
+%%     ссылка на работу по нейро-символическому планированию 2025.
+%%   - Добавлен связующий абзац, соединяющий три примера с разрабатываемым
+%%     контроллером пастеризационной установки.
+%%
+%% !!! ДАВИДУ: в тексте появились НОВЫЕ ключи \cite. Готовые BibTeX-записи для
+%% !!! bib/links.bib лежат В КОНЦЕ ЭТОГО ФАЙЛА (закомментированный блок).
+%% !!! Пока они не добавлены в bib/links.bib, в PDF на их месте будет [?].
+%% !!! Новые ключи: Lawrence2024, Park2025rl, Zribi2025, Bhuyan2024,
+%% !!! Colelough2025, Confalonieri2025, KasperskyICS, AWS2025ar,
+%% !!! AmazonVulcan2025, AmazonAR2025, UnitreeG1, Attolino2025.
 %% =============================================================================
 
 \section{Neurocontrol}
 
-Neurocontrol is a relatively young field of research that became independent in
-1988. However, research in this area began much earlier. One definition in the
-science of cybernetics considers it a general theory of control and interaction
-not only of machines but also of biological beings. Neurocontrol tries to
-achieve this position through the construction of control systems
-(decision-making systems), which can be trained during operation, and thus
-improve their performance. In this case, such systems use parallel mechanisms of
-information processing, like the brain of living organisms \cite{Uskov_2004}.
+Neurocontrol denotes the use of trainable neural approximators as components of
+a feedback loop. The field separated from general neural network research at the
+end of the 1980s, although its premise is older. Cybernetics describes
+regulation in machines and in living organisms by the same formal means, and
+neurocontrol inherits from this view two properties: a control system that
+improves its own behaviour during operation, and parallel rather than sequential
+processing of sensor data~\cite{Uskov_2004, Neurocomputers}. Recent surveys of
+machine learning in the process industries treat these properties as the
+practical reason for adopting learned components, because such components absorb
+plant behaviour that first-principles models describe
+poorly~\cite{Lawrence2024}.
 
-For a long time the idea of building a perfect control system — a universal
-controller that would look like a ‘black box’ from the outside was popular. It
-could be used to control any system, with connections to sensors, actuators,
-other controllers, and a special link to the «Efficiency Module» — a system that
-determines the management efficiency based on given criteria. The user of such a
-control system would only set the desired result; the further trained controller
-would manage itself, perhaps following a complex strategy of achieving the
-desired result in the future. It would also constantly adjust its management
-based on the management object's response to achieve maximum efficiency. A
-classification of such systems is given below (Fig. \ref
-{fig:neuro_control_classification}).
+A pasteurization unit exhibits exactly this class of behaviour. Heat transfer in
+the plate heat exchanger is nonlinear, the holding tube introduces a transport
+delay that depends on the flow rate, and fouling gradually reduces the gain of
+the heating loop over a production run. A proportional--integral--derivative
+(PID) controller tuned for a clean exchanger and a nominal flow therefore
+detunes as the shift proceeds. A learned component restores performance by
+following the changed plant instead of waiting for a manual
+retune~\cite{Park2025rl}.
+
+Early neurocontrol was driven by a stronger ambition: a universal regulator that
+looks like a black box from the outside. Such a regulator would be wired to
+sensors, actuators, neighbouring controllers, and an efficiency module that
+scores its behaviour against a chosen criterion. The operator would declare only
+the target state, and the trained controller would find its own path to that
+state and keep correcting itself from the plant response. The ambition remains
+attractive, yet it is unacceptable in food processing, where the holding
+temperature has to be demonstrably maintained and every intervention has to be
+traceable. Current work on learning-based control accordingly shifts the
+emphasis from unconstrained learning towards learned components with stated
+stability and safety properties~\cite{Lawrence2024, Park2025rl}.
+
+Neural network methods for control problems are classified by the capability
+that the network supplies to the loop. Approximation replaces a mapping that is
+hard to derive analytically, optimization improves a performance index over a
+horizon, and adaptation keeps an existing regulator matched to a drifting plant.
+Fig.~\ref{fig:neuro_control_classification} places the five schemes used in
+practice within these three capabilities, and
+Table~\ref{tab:neurocontrol_schemes} states what the network learns in each
+scheme and how the scheme applies to the pasteurization unit.
 
 \begin{figure}[ht]
-  \begin{adjustbox}{width = \columnwidth}
+  \centering
+  \begin{adjustbox}{width=\columnwidth}
+    \begin{tikzpicture}[
+        capability/.style={circle, minimum size=52mm, draw, thick,
+          fill opacity=0.42, text opacity=1},
+        scheme/.style={align=center, font=\small, inner sep=1pt},
+        capname/.style={align=center, font=\bfseries\large}
+      ]
 
-    \tikzset{fontMethod/.style={font=\bfseries\large}}
-    \tikzset{fontLabel/.style={font=\normalsize}}
+      \node[capability, draw=blue!60!black,   fill=blue!35]   at (-1.5, 0.85) {};
+      \node[capability, draw=orange!70!black, fill=orange!35] at ( 1.5, 0.85) {};
+      \node[capability, draw=green!50!black,  fill=green!35]  at ( 0.0,-1.70) {};
 
-    \centering
+      \node[capname] at (-3.4, 3.1) {Approximation};
+      \node[capname] at ( 3.4, 3.1) {Optimization};
+      \node[capname] at ( 0.0,-4.5) {Adaptation};
 
-    \pgfdeclarepatternformonly{custom vertical
-    lines}{\pgfqpoint{0pt}{0pt}}{\pgfqpoint{10pt}{10pt}}{\pgfqpoint{3pt}{10pt}}{
-      \pgfsetlinewidth{0.35pt}
-      \pgfpathmoveto{\pgfqpoint{0pt}{0pt}} \pgfpathlineto{\pgfqpoint{0pt}{10pt}}
-      \pgfusepath{stroke}
-    }
-
-    \pgfdeclarepatternformonly{custom horizontal
-    lines}{\pgfqpoint{0pt}{0pt}}{\pgfqpoint{10pt}{10pt}}{\pgfqpoint{10pt}{3pt}}{
-      \pgfsetlinewidth{0.35pt}
-      \pgfpathmoveto{\pgfqpoint{0pt}{0pt}} \pgfpathlineto{\pgfqpoint{10pt}{0pt}}
-      \pgfusepath{stroke}
-    }
-
-    \begin{tikzpicture}
-
-      \def\ellipseWidth{8cm} \def\ellipseHeight{2.4cm}
-
-      \def\lineThickness{0.3pt}
-
-      \coordinate (A) at (0,0); \coordinate (B) at ($(A) + (1.5,0)$);
-      \coordinate (C) at ($(A) ! .5 ! (B) ! {sin(60)*1.5} ! 90:(B)$);
-
-      \def\offset{0.65}
-
-      \coordinate (A1) at ($(A) + (-\offset*2, 0)$); \coordinate (B1) at ($(B) +
-      (\offset*2, 0)$); \coordinate (C1) at ($(C) + (0, \offset)$);
-
-      \node[draw, shape=ellipse, minimum width=\ellipseWidth, minimum
-        height=\ellipseHeight, pattern=custom vertical lines, line
-        width=\lineThickness] at (A1) {};
-
-      \node[draw, shape=ellipse, minimum width=\ellipseWidth, minimum
-        height=\ellipseHeight, pattern=custom horizontal lines, line
-        width=\lineThickness] at (B1) {};
-
-      \node[draw, shape=ellipse, minimum width=\ellipseWidth, minimum
-        height=\ellipseHeight, fill=lightgray, opacity=0.5, very thin] at (C1)
-        {};
-
-      \coordinate (AL) at ($(A) - ({\ellipseWidth/2.8}, 0)$); \coordinate (BR)
-      at ($(B) + ({\ellipseWidth/2.8}, 0)$); \coordinate (CA) at ($(C) + (0,
-      {\ellipseHeight/5})$); \coordinate (CB) at ($(A) ! .5 ! (B)$);
-
-      \node[fontMethod] at (AL) {Approximation}; \node[fontMethod] at (BR)
-      {Optimization}; \node[fontMethod] at (CB) {Adaptation}; \node[fontMethod]
-      at ($(CA) + (0, 0.2)$) {Traditional control systems};
-
-      \coordinate (SSMD) at ($(AL) + (0.5, 0.6)$); \draw [fill=black] (SSMD)
-      circle(1.5pt); \draw (SSMD) -- ++(-1, 1.4) -- ++(-3.2,0);
-      \node[align=left] at ($(SSMD) + (-3, 2)$) {Sequential \\ Control Scheme};
-
-      \coordinate (PSMD) at ($(CB) + (-0.6, -0.6)$); \draw [fill=black] (PSMD)
-      circle(1.5pt); \draw (PSMD) -- ++(-0.9, -1.5) -- ++(-4,0);
-      \node[align=left] at ($(PSMD) + (-3.2, -0.9)$) {Parallel\\ Control
-      Scheme};
-
-      \coordinate (SMSS) at ($(CB) + (0.6, 0.6)$); \draw [fill=black] (SMSS)
-      circle(1.5pt); \draw (SMSS) -- ++(0.75, -3.8) -- ++(3,0);
-      \node[align=left] at ($(PSMD) + (3.5, -2.1)$) {Self-Tuning\\ Control
-      Scheme};
-
-      \coordinate (SMEC) at ($(CB) + (0.4, -0.7)$); \draw [fill=black] (SMEC)
-      circle(1.5pt); \draw (SMEC) -- ++(-0.75, -2.9) -- ++(-3.9,0);
-      \node[align=left] at ($(SMEC) + (-2.6, -2.2)$) {Control Scheme\\ with
-      Emulator\\ and Controller};
-
-      \coordinate (ACS) at ($(B) + (1.2, -0.7)$); \draw [fill=black] (ACS)
-      circle(1.5pt); \draw (ACS) -- ++(0.7, -1.5) -- ++(3.5,0);
-      \node[align=left] at ($(ACS) + (2.5, -1)$) {Adaptive-\\ Critical Control
-      Scheme};
+      \node[scheme] at (-2.90, 1.60) {Sequential\\ control scheme};
+      \node[scheme] at ( 0.00, 1.95) {Scheme with emulator\\ and controller};
+      \node[scheme] at (-1.85,-0.85) {Parallel\\ control scheme};
+      \node[scheme] at ( 1.85,-0.85) {Adaptive-critical\\ control scheme};
+      \node[scheme] at ( 0.00,-3.15) {Self-tuning\\ control scheme};
 
     \end{tikzpicture}
   \end{adjustbox}
 
-  \caption{Classification of Neural Network Methods for Solving Control
-  Problems}
+  \caption{Classification of neural network methods for solving control
+  problems}
   \label{fig:neuro_control_classification}
 \end{figure}
 
-\section{Neuro-symbolic control}
+\begin{table}[ht]
+  \caption{Neurocontrol schemes and their role on the pasteurization unit}
+  \label{tab:neurocontrol_schemes}
+  \centering
+  \footnotesize
+  \setlength{\tabcolsep}{3pt}
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{p{1.75cm}p{2.55cm}p{3.45cm}}
+    \hline
+    \textbf{Scheme} & \textbf{What the network learns} & \textbf{Role on the
+    unit} \\
+    \hline
+    Sequential & The inverse model of the plant, used directly as a regulator &
+    Removes the need for an analytical model of the heating section, but demands
+    a data set that covers all operating modes \\
+    Scheme with emulator and controller & A model of the plant, through which
+    the second network is trained & Allows offline training on a simulated
+    exchanger before the controller touches the real unit \\
+    Parallel & A corrective signal added to the output of a conventional
+    regulator & Compensates the residual error of the existing PID loop without
+    replacing it \\
+    Adaptive-critical & An estimate of the future cost and a policy that
+    minimizes it & Suitable for coordinating heating, holding, and cooling
+    stages over a horizon rather than pointwise \\
+    Self-tuning & The dependence of the regulator coefficients on the current
+    plant state & Keeps the PID loop matched to fouling and to changes of flow
+    rate; used in this work \\
+    \hline
+  \end{tabular}
+\end{table}
 
-Neuro-symbolic AI is one of the emerging directions in AI today. The first
-paradigm of AI was symbolic AI, which is based on symbolic representation of
-tasks and logical inference. It was succeeded by statistical AI (machine
-learning, neural networks), which solves problems that the previous paradigm
-could not handle, such as image, speech, and text recognition.
-
-For a long time, these two approaches were considered opposites, with the first
-paradigm deemed outdated. However, it turned out that combining symbolic and
-statistical AI can significantly enhance the efficiency of neural networks and
-overcome some of the limitations of statistical AI for certain tasks.
-
-Neuro-symbolic artificial intelligence is an advanced version that improves the
-decision-making process of a neural network by incorporating classical AI based
-on rules (symbolic AI). This hybrid approach requires less training data and
-allows humans to track how AI makes decisions.
-
-For example, in image recognition, neuro-symbolic AI can use deep learning to
-identify an individual object and then add a layer of information about the
-object's properties and its individual parts using symbolic reasoning. Thus, a
-neuro-symbolic AI system can not only identify an object, such as an apple, but
-also explain why it identified it as an apple by providing a list of unique
-characteristics and properties of the apple.
+The self-tuning scheme is the least invasive of the five, because the
+conventional regulator stays in the loop and the network only moves its
+coefficients. Fig.~\ref{fig:pid_controller} shows this scheme for the
+pasteurization unit: delayed samples of the pasteurization temperature and of
+the opening of the steam valve are mapped to the proportional, integral, and
+derivative coefficients of the PID controller. Reinforcement learning is now
+used to adjust such a mapping online, which removes the fixed learning rate that
+limited earlier neural tuners~\cite{Zribi2025}. This scheme is therefore taken
+as the basis of the controller described below.
 
 \begin{figure}[ht]
   \centering
   \includegraphics[width=\columnwidth]{figures/Neuro-adjuster-PID.png}
-  \caption{PID controller structure}
+  \caption{Neural tuner of the PID controller of the pasteurization unit}
   \label{fig:pid_controller}
 \end{figure}
 
+None of the five schemes, however, states why a correction was applied. The
+network reports what to do, not on what grounds. Closing this gap requires
+knowledge that is represented explicitly, which is the subject of the next
+section.
+
+\section{Neuro-symbolic control}
+
+Neuro-symbolic AI combines the two historical paradigms of the field. Symbolic
+AI represents a task as structures of signs and derives conclusions by logical
+inference. Statistical AI, and neural networks in particular, extracts
+regularities from data and solves recognition tasks that resist formalization.
+The two were long treated as competitors, and the symbolic branch was widely
+declared obsolete~\cite{Bhuyan2024}.
+
+Systematic reviews of the last two years show that the combination has become a
+research field in its own right rather than a compromise between the
+paradigms~\cite{Colelough2025}. A symbolic layer supplies the constraints,
+definitions, and causal relations that a network would otherwise have to infer
+from data. Consequently, a hybrid system reaches comparable accuracy on a
+smaller training set, and its conclusions can be traced back to explicit
+statements. Ontologies act as the interface between the layers, because they fix
+the vocabulary in which a numerical output becomes an assertion about the
+plant~\cite{Confalonieri2025}.
+
+The value of the combination is clearest when a prediction has to become an
+action on a particular piece of equipment. A network trained on pasteurizer
+telemetry can report that the temperature at the outlet of the holding tube will
+fall below the pasteurization setpoint within the next minute. Taken alone, this
+number identifies neither the cause nor the admissible response. A symbolic
+layer that holds the ISA-88 model of the unit and the ISA-5.1 documentation of
+its loops resolves which control module is affected, checks whether the running
+phase permits a setpoint change, and reports the chain of assertions that led to
+the recommendation~\cite{ISA-88-formalization, isa-5.1-ostis}. The operator thus
+receives a conclusion together with its justification.
+
+OSTIS Technology provides such a layer in a form suitable for a controller.
+Standards, plant structure, and process knowledge reside in a single semantic
+network, so a neural module and a rule set operate on the same representation
+instead of on separate copies~\cite{Golenkov2019, ivaniuk2025neurosymbolic}.
+Earlier work on the same unit showed that neural modules attach to an OSTIS
+knowledge base without a dedicated integration format, which keeps the symbolic
+layer authoritative and the neural layer
+replaceable~\cite{Golovko2018integration, ivaniuk2024neurosemantic}.
+
 \section{Examples}
 
-Here are some examples of the application of neuro-symbolic control in various
-fields used by Kaspersky \cite{KasperskyMLAD}.
+Three deployments show the range of the approach at different scales: anomaly
+detection over industrial telemetry, verified reasoning in enterprise software
+and warehouse robotics, and layered control of a general-purpose robot.
 
-Kaspersky MLAD is designed to predict industrial process data and identify signs
-of future anomalies in equipment operation. The goal is to prevent failures,
-accidents, and unplanned downtime by detecting warning signs long before they
-affect enterprise operations. For Kaspersky, an anomaly is a significant
-deviation of actual process data from the forecast.
+\subsection{Kaspersky MLAD}
 
-Kaspersky developed MLAD because existing monitoring systems were outdated,
-unable to find the causes of accidents, and overwhelmed by the volume of
-telemetry data.
+Kaspersky MLAD observes the telemetry of a technological process and reports
+deviations from its predicted behaviour~\cite{KasperskyMLAD}. For this system an
+anomaly is a statistically significant divergence between measured and forecast
+values, not a violation of a fixed threshold. The purpose is to expose the early
+signs of a failure long before they affect production.
+Fig.~\ref{fig:MLAD} shows the position of the system in the production loop.
 
 \begin{figure*}[ht]
     \centering
@@ -188,78 +233,58 @@ telemetry data.
     \label{fig:MLAD}
 \end{figure*}
 
-Kaspersky MLAD monitors large telemetry streams and identifies deviations that
-can threaten production. It predicts process data, detects anomalies, and helps
-prevent failures, accidents, and unplanned downtime. The system's place and role
-are shown in Fig.~\ref{fig:MLAD}.
+The system was developed because conventional monitoring reacted to events that
+had already occurred and did not scale to the available data. A single facility
+produces tens of thousands of tags updated roughly 10 times per second, with
+years of history behind them~\cite{KasperskyICS}.
 
-The operation of Kaspersky MLAD does not require any modification of the
-industrial process. It does not affect the process or interfere with data
-transmission or industrial control equipment. The system notifies the operator
-about possible failures while leaving the final decision to the operator.
+MLAD does not intervene in the process. It modifies neither the control logic
+nor the transmission of data, and the final decision remains with the operator.
+This property is essential for a pasteurization unit, where a monitoring system
+must not become an uncontrolled participant in the control loop.
 
-From a technical perspective, Kaspersky MLAD uses neural networks to analyze
-telemetry streams. Because telemetry parameters are interconnected and influence
-each other, the system identifies relationships between parameters and uses them
-to build a forecast. This forecast is then processed by various neuro-semantic
-means to reveal anomalies.
+Technically the system treats telemetry as a multivariate time series and trains
+a recurrent network with long short-term memory cells to reproduce its normal
+behaviour~\cite{KasperskyICS}. Because process variables are mutually dependent,
+the learned relations between tags carry most of the diagnostic information.
+Convolutional, densely connected, and temporal convolutional architectures serve
+the accompanying classification and preprocessing tasks. MLAD is therefore a set
+of interacting neural modules rather than a single model.
 
-Kaspersky MLAD uses various neural network architectures such as CNN, DenseNet,
-TCN, and RNN. The first three architectures are used for different kinds of data
-processing, analysis, and anomaly detection, while RNNs forecast industrial
-process data. Thus, Kaspersky MLAD consists of different neural network modules
-interacting with each other.
+Six analytical processors work on top of this forecast.
+Table~\ref{tab:mlad_detectors} summarizes their functions.
 
-But how exactly does the Kaspersky MLAD system detect anomalies? For this, the
-system has six types of anomaly detectors, or more precisely, analytical
-processors:
-
-\begin{itemize}
-    \item predictive detector;
-    \item state classifier;
-    \item rule-based diagnostic detector;
-    \item time-to-threshold forecast detector;
-    \item stream processor;
-    \item event processor.
-\end{itemize}
-
-The predictive anomaly detector is a system that first predicts the current
-values of an object’s parameters, after which the prediction is compared with
-the actually observed behavior. If the deviation between the real process
-behavior and the predicted behavior is significant, then the predictive detector
-classifies it as an anomaly. The detector is trained on historical telemetry
-data and detects anomalies “without hints” from an expert — including previously
-unknown anomalies that nobody has noticed.
-
-The state classifier uses Gaussian models, or more precisely, the “elliptical
-envelope” algorithm. This detector is used for automatic detection of object
-states that differ significantly from the states corresponding to normal
-operating modes.
-
-The rule-based diagnostic detector is used to detect anomalies whose symptoms
-are known in advance. The detector monitors changes in the object’s behavior
-according to specified criteria. Any verification logic can be implemented in
-the diagnostic rules. The most popular criteria are: persistent threshold
-exceedance, increase or decrease of a metric over a period, step changes, and
-“freezing” of values at one level.
-
-The time-to-threshold forecast detector is also used to predict when a
-particular technological parameter will reach a certain threshold value. The
-detector triggers when the time remaining to the threshold is less than
-specified in the settings.
-
-The stream processor brings the real-time telemetry data arriving from the
-monitored object to an equal-interval time grid required for the operation of
-predictive detectors and diagnostic rules. In the process of converting data to
-an equal-interval time grid, the stream processor identifies and, as far as
-possible, eliminates stream defects such as data loss, receiving invalid values,
-and observations arriving too early or too late.
-
-Unlike the predictive detector, which analyzes continuous time series, the event
-processor works with sequences of discrete events. A special type of neural
-network analyzes the event stream, identifying typical patterns. An anomaly in
-this case is an unusual sequence of events, for example, personnel actions
-and/or a series of anomalies detected by other detectors.
+\begin{table}[ht]
+  \caption{Analytical processors of Kaspersky MLAD}
+  \label{tab:mlad_detectors}
+  \centering
+  \footnotesize
+  \setlength{\tabcolsep}{3pt}
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{p{2.35cm}p{5.45cm}}
+    \hline
+    \textbf{Processor} & \textbf{Function} \\
+    \hline
+    Predictive detector & Forecasts the current values of the process variables
+    and reports a significant divergence from the observed ones; trained on
+    history without expert labels, so previously unknown anomalies are also
+    detected \\
+    State classifier & Separates operating modes with an elliptic envelope built
+    from Gaussian models and reports states that match no known mode \\
+    Rule-based diagnostic detector & Checks symptoms known in advance:
+    persistent threshold excess, monotone drift over a period, step changes, and
+    values frozen at one level \\
+    Time-to-threshold detector & Estimates the time remaining until a variable
+    reaches a given threshold and triggers when this time falls below the
+    configured margin \\
+    Stream processor & Resamples incoming telemetry to a uniform time grid and
+    repairs stream defects such as gaps, invalid values, and late observations
+    \\
+    Event processor & Analyses sequences of discrete events and reports unusual
+    sequences, including combinations of operator actions and earlier alarms \\
+    \hline
+  \end{tabular}
+\end{table}
 
 \begin{figure*}[ht]
     \centering
@@ -269,144 +294,212 @@ and/or a series of anomalies detected by other detectors.
     \label{fig:MLADex}
 \end{figure*}
 
-Among all the detector types, it is worth focusing in more detail on the
-predictive detector. Its operation is simple: first a data forecast is made,
-then this forecast is compared with the actually observed behavior, and
-anomalies are determined using machine learning. This module can be divided into
-two models: a forecasting model and a forecast processing model. The predictive
-detector is needed to analyze technological process data, mainly presented as
-time series containing various information about the object’s state, different
-physical quantities taken from sensors, and so on. The predictive detector works
-according to a specific algorithm. First, an input data window is formed from
-the technological process data arriving at the predictive detector. Based on the
-input data window, a forecast is made, forming a prediction window. This window
-shows the object’s behavior in the near future. Then the error is calculated
-between the forecast and the actually observed data for each predicted value.
-Next, the mean squared error is computed from the set of these errors. When
-calculating this error, the values of individual forecast errors are multiplied
-by specific weights. Thus, the transition to the second neural network model of
-the predictive detector is performed. This module determines an anomaly based on
-the value of the mean squared error with the help of a certain threshold that is
-formed during the training of the neural network model. An example of this
-process can be seen in Figure \ref{fig:MLADex}.
+The predictive detector deserves separate attention, because it defines the
+behaviour of the whole product. It forms an input window from the arriving
+process data and produces a prediction window that describes the near future of
+the object. The individual prediction errors are then weighted and reduced to a
+mean squared error. A second model compares this error with a threshold learned
+during training and decides whether an anomaly has occurred.
+Fig.~\ref{fig:MLADex} shows the sequence on real data.
+
+MLAD illustrates both the strength and the limit of a purely statistical
+detector. It finds deviations that no expert described in advance, yet it
+reports them in terms of tags and error magnitudes. Turning such a report into a
+statement about a specific control module still requires an explicit model of
+the unit.
 
 \subsection{Amazon}
 
-After the explosive debut of ChatGPT in 2022, the world of artificial
-intelligence became obsessed with neural networks. Giant language models trained
-on trillions of words became a symbol of progress — and at the same time a
-source of concern because of their “black box”: systems generate plausible
-answers but cannot explain why they arrived at that conclusion. Recent analysis
-of modern LLMs, including discussions around O3 and Grok 4, highlights both
-their emerging utility and the continuing need for transparent, controllable AI
-systems \cite{Marcus2024}. A similar review in \textit{The Wall Street Journal}
-shows how Amazon uses a neuro-symbolic approach to increase the interpretability
-and reliability of neural networks \cite{WSJ2024}.
+Amazon applies the neuro-symbolic combination in the opposite direction: formal
+reasoning constrains the output of a neural model rather than the other way
+round. The motivation is the one that drives the whole field, namely that a
+statistical model produces a plausible answer but cannot certify
+it~\cite{Marcus2024, WSJ2024}.
 
-However, as \textit{The Wall Street Journal} reminds us, neural networks are not
-the only path in AI. An approach that was temporarily forgotten, known as
-symbolic reasoning, is attracting attention again. Unlike statistical models, it
-relies on logic, rules, and explicitly defined symbols, allowing machines to
-solve problems that can be formalized as code or mathematical statements.
+Automated Reasoning checks became generally available in Amazon Bedrock
+Guardrails in August 2025. The service converts a body of domain documents into
+a logical policy and then verifies model answers against that policy by formal
+methods instead of by a second neural model. Amazon reports verification
+accuracy up to 99\% and builds a policy from documents of up to 122,880 tokens
+in a single pass~\cite{AWS2025ar}.
 
-This is how Amazon presented a way to use the neuro-symbolic approach for its
-purposes. The new approach combines the power of modern neural networks (such as
-LLMs) with classical symbolic reasoning methods such as logic, rules, and
-automated theorem proving. This Amazon approach allows systems not only to
-“guess” answers based on statistics, but also to reason soundly, verify the
-correctness of their conclusions, and operate with much smaller volumes of data
-compared to purely neural approaches.
+The same separation of roles is applied to physical systems. The Vulcan
+manipulator, presented in 2025, complements visual perception with force
+feedback and handles about 75\% of the items stored in a fulfilment
+centre~\cite{AmazonVulcan2025}. Reliability there comes from constraints that
+hold regardless of what the learned policy proposes. Amazon also funds external
+work on the same problem: the Automated Reasoning call for proposals of autumn
+2025 is directed at sound neuro-symbolic reasoning that couples language models
+with automated solvers and proof checking~\cite{AmazonAR2025}.
 
-It is this hybrid — neuro-symbolic AI — that combines the intuition of neural
-networks with the rigor of logic — that is considered a promising direction.
-Amazon has hinted that this technology can be applied not only to application
-software, but also to the control of complex physical systems such as robots.
-For example, the robotic arm \textit{Vulcan} (Amazon warehouse automation
-systems) shows that the company can use such methods to improve the reliability
-of autonomous systems where mistakes are unacceptable.
-
-Beyond robots, Amazon is actively advancing in the software world as well.
-
-In 2025, \textit{Amazon Web Services (AWS)} continues to develop its cloud
-services, offering innovative solutions for various industrial sectors. One of
-the key directions is the integration of artificial intelligence and machine
-learning into production automation and supply chain management processes.
-
-In particular, AWS uses neuro-symbolic agents for:
-
-\begin{itemize}
-    \item increasing safety and explainability in regulated industries (for
-    example, finance, healthcare), where it is critically important to
-    understand why an AI made a particular decision.
-    \item automating complex tasks that require logical inference: processing
-    documents up to 80,000 tokens, analyzing regulations, verifying code, and
-    making rule-based decisions.
-    \item reducing computing costs: by integrating symbolic methods, it is
-    possible to reduce dependence on huge volumes of data and parameters, making
-    systems more efficient and environmentally friendly.
-\end{itemize}
-
-In addition, Amazon supports research in this area through programs such as the
-\textit{Automated Reasoning Call for Proposals} (autumn 2025), aimed at
-developing “sound neuro-symbolic reasoning” that combines language models,
-automated solvers, and proof checking to improve the efficiency of solving
-complex tasks.
+The lesson for industrial control is the division of responsibility. The learned
+component proposes an action, the formal component admits or rejects it, and a
+rejection is explainable by construction.
 
 \subsection{Humanoid robot Unitree G1 (China)}
 
-In 2025, a hybrid approach combining the advantages of neural methods and
-symbolic (logical) systems — the so-called neuro-symbolic control — is gaining
-increasing traction in autonomous robotics. One example of implementing this
-technology is humanoid robots such as \textit{Unitree G1}, developed by the
-Chinese company \textit{Unitree Robotics}. This robot, presented as a platform
-for research and potential commercial use, demonstrates high mobility, balance,
-and the ability to perform complex manipulations. However, to perform tasks in
-dynamic, partially observable, and unstructured environments (for example, in
-everyday life or in production), not only low-level motion control is required,
-but also the ability to reason, plan, and interpret context — this is precisely
-where the value of the neuro-symbolic approach becomes apparent.
+Humanoid platforms show the layered organization of a hybrid controller at full
+scale. Unitree G1 is a research platform with 23 to 43 degrees of freedom,
+equipped with a three-dimensional lidar and a depth camera and supplied with an
+open software development kit, ROS~2 support, and a unified robot
+model~\cite{UnitreeG1}. Low-level motion control alone does not make such a
+platform useful in an unstructured environment. The robot has to interpret
+context, plan a sequence of actions, and revise the plan when the environment
+contradicts it.
 
-The main goal of introducing neuro-symbolic control into \textit{Unitree G1} has
-been to overcome the limitations of purely neural systems, which, despite their
-high effectiveness in pattern recognition and motion control, lack
-interpretability, generalize poorly to new scenarios, and are not capable of
-logical inference. At the same time, classical symbolic systems — based on
-rules, ontologies, and logical inference — are too rigidly structured and do not
-cope with noise, uncertainty, and the variability of the real world. The
-neuro-symbolic approach combines the flexibility of learning from data with
-structured decision logic.
-
-The control system of \textit{Unitree G1} in 2025 is implemented as a
-multi-level hybrid architecture consisting of:
+Neither paradigm covers this task alone. A learned policy generalizes poorly to
+situations absent from its training data, whereas a symbolic planner fails on
+noisy perception. A hybrid architecture for such a robot is therefore organized
+in four layers:
 
 \begin{enumerate}
-    \item \textbf{Perceptual level} — based on deep neural networks (Vision
-    Transformers, 3D CNN, PointNet++), responsible for processing data from
-    cameras, lidars, IR sensors, and tactile sensors. This level is responsible
-    for object detection, gesture recognition, and pose estimation of a person
-    and other agents.
-    \item \textbf{Symbolic level} — implemented using domain ontologies and
-    logical programming languages (for example, Answer Set Programming or
-    Probabilistic Soft Logic). Here knowledge about the world is formalized: “a
-    cup is on the table”, “the door is closed”, “a person asks to bring water”.
-    This level allows building causal chains and checking the consistency of
-    states.
-    \item \textbf{Interface module} — a neuro-symbolic translator that converts
-    continuous outputs of neural networks into discrete symbolic assertions and,
-    conversely, uses symbolic plans to generate target trajectories or commands
-    for low-level controllers. Differentiable logic layers (for example, Neural
-    Logic Machines) and knowledge encoders based on large language models (LLMs)
-    fine-tuned on technical and everyday scenarios play a key role here.
-    \item \textbf{Action planner} — a hybrid module combining classical planning
-    (PDDL, HTN) with reinforcement learning (PPO, SAC). It generates a sequence
-    of actions that takes into account both the physical constraints of the
-    robot and the logical conditions for task execution.
+    \item \textbf{Perception.} Deep networks process camera, lidar, and tactile
+    data, and produce object detections, poses, and gestures.
+    \item \textbf{Symbolic model.} Domain ontologies and a logic programming
+    language hold statements about the world, such as the position of an object
+    or the state of a door, and support consistency checks and causal chains.
+    \item \textbf{Interface.} A translator converts continuous network outputs
+    into discrete assertions and symbolic plans into target trajectories for the
+    low-level controllers.
+    \item \textbf{Planner.} A classical planner combined with reinforcement
+    learning produces an action sequence that respects both the physical
+    constraints of the robot and the logical conditions of the task.
 \end{enumerate}
 
-Although by 2025 \textit{Unitree Robotics} has not officially announced the
-introduction of neuro-symbolic control in \textit{G1}, the platform’s
-architecture — including an open SDK, ROS 2 support, multimodal sensors, and
-integration with large models (for example, UnifoLM) — makes it a promising
-basis for implementing such hybrid systems. Approaches that could potentially be
-adapted for G1 are actively being studied in the scientific community.
+Unitree has not announced neuro-symbolic control as a product feature, so this
+architecture describes what the platform admits rather than what it ships. The
+research direction is nevertheless active. Recent work performs symbolic
+planning with a locally hosted language model of about 1.5 billion parameters
+and reports 70.6\% plan validity across several domains, which brings hybrid
+planning within reach of an on-board computer~\cite{Attolino2025}.
 
+The three examples differ in scale but share one structure. A neural component
+handles the continuous and noisy part of the task, an explicit model handles the
+part that has to be justified, and an interface converts one into the other. The
+controller described in the following sections applies this structure to a
+pasteurization unit, with OSTIS Technology in the role of the explicit model.
+
+%% =============================================================================
+%% НОВЫЕ ИСТОЧНИКИ ДЛЯ bib/links.bib — ДЛЯ ДАВИДА (@Bidway)
+%% Скопировать блок ниже в bib/links.bib БЕЗ символов "%% " в начале строк.
+%% Формат согласован с существующими записями. Ключи уже используются в тексте
+%% выше, поэтому до добавления записей в PDF будет [?].
+%% =============================================================================
+%%
+%% @article{Lawrence2024,
+%%   author  = {Lawrence, Nathan P. and Damarla, Seshu Kumar and Kim, Jong Woo
+%%              and Tulsyan, Aditya and Amjad, Faraz and Wang, Kai and Chachuat,
+%%              Benoit and Lee, Jong Min and Huang, Biao and Gopaluni, R.
+%%              Bhushan},
+%%   title   = {Machine learning for industrial sensing and control: A survey
+%%              and practical perspective},
+%%   journal = {Control Engineering Practice},
+%%   volume  = {145},
+%%   pages   = {105841},
+%%   year    = {2024},
+%%   doi     = {10.1016/j.conengprac.2024.105841}
+%% }
+%%
+%% @article{Park2025rl,
+%%   author  = {Park, Joonsoo and Jung, Hyein and Kim, Jong Woo and Lee, Jong
+%%              Min},
+%%   title   = {Reinforcement Learning for Process Control: Review and Benchmark
+%%              Problems},
+%%   journal = {International Journal of Control, Automation and Systems},
+%%   volume  = {23},
+%%   number  = {1},
+%%   pages   = {1--40},
+%%   year    = {2025},
+%%   doi     = {10.1007/s12555-024-0990-1}
+%% }
+%%
+%% @article{Zribi2025,
+%%   author  = {Zribi, Ali and Taouil, Hajer},
+%%   title   = {Adaptive reinforcement learning-based tuning of neural {PID}
+%%              controllers for nonlinear systems},
+%%   journal = {Journal of Vibration and Control},
+%%   year    = {2025},
+%%   doi     = {10.1177/10775463251404852}
+%% }
+%%
+%% @article{Bhuyan2024,
+%%   author  = {Bhuyan, Bikram Pratim and Ramdane-Cherif, Amar and Tomar, Ravi
+%%              and Singh, T. P.},
+%%   title   = {Neuro-symbolic artificial intelligence: a survey},
+%%   journal = {Neural Computing and Applications},
+%%   volume  = {36},
+%%   number  = {21},
+%%   pages   = {12809--12844},
+%%   year    = {2024},
+%%   doi     = {10.1007/s00521-024-09960-z}
+%% }
+%%
+%% @misc{Colelough2025,
+%%   author       = {Colelough, Brandon C. and Regli, William},
+%%   title        = {Neuro-Symbolic {AI} in 2024: A Systematic Review},
+%%   howpublished = {\url{https://arxiv.org/abs/2501.05435}},
+%%   year         = {2025},
+%%   note         = {arXiv:2501.05435. Accessed: 2026-09-03}
+%% }
+%%
+%% @article{Confalonieri2025,
+%%   author  = {Confalonieri, Roberto and Guizzardi, Giancarlo},
+%%   title   = {On the multiple roles of ontologies in explanations for
+%%              neuro-symbolic {AI}},
+%%   journal = {Neurosymbolic Artificial Intelligence},
+%%   year    = {2025},
+%%   doi     = {10.3233/NAI-240754}
+%% }
+%%
+%% @misc{KasperskyICS,
+%%   author       = {{Kaspersky ICS CERT}},
+%%   title        = {{MLAD}: Machine Learning for Anomaly Detection},
+%%   howpublished = {\url{https://ics-cert.kaspersky.com/publications/mlad-machine-learning-for-anomaly-detection/}},
+%%   year         = {2025},
+%%   note         = {Accessed: 2026-09-03}
+%% }
+%%
+%% @misc{AWS2025ar,
+%%   author       = {{Amazon Web Services}},
+%%   title        = {Minimize {AI} hallucinations and deliver up to 99\%
+%%                   verification accuracy with Automated Reasoning checks},
+%%   howpublished = {\url{https://aws.amazon.com/blogs/aws/minimize-ai-hallucinations-and-deliver-up-to-99-verification-accuracy-with-automated-reasoning-checks-now-available/}},
+%%   year         = {2025},
+%%   note         = {Accessed: 2026-09-03}
+%% }
+%%
+%% @misc{AmazonVulcan2025,
+%%   author       = {{Amazon}},
+%%   title        = {Introducing {Vulcan}: {Amazon's} first robot with a sense of
+%%                   touch},
+%%   howpublished = {\url{https://www.aboutamazon.com/news/operations/amazon-vulcan-robot-pick-stow-touch}},
+%%   year         = {2025},
+%%   note         = {Accessed: 2026-09-03}
+%% }
+%%
+%% @misc{AmazonAR2025,
+%%   author       = {{Amazon Science}},
+%%   title        = {Automated Reasoning call for proposals --- Fall 2025},
+%%   howpublished = {\url{https://www.amazon.science/research-awards/call-for-proposals/automated-reasoning-call-for-proposals-fall-2025}},
+%%   year         = {2025},
+%%   note         = {Accessed: 2026-09-03}
+%% }
+%%
+%% @misc{UnitreeG1,
+%%   author       = {{Unitree Robotics}},
+%%   title        = {Humanoid robot {G1}},
+%%   howpublished = {\url{https://www.unitree.com/g1/}},
+%%   year         = {2025},
+%%   note         = {Accessed: 2026-09-03}
+%% }
+%%
+%% @misc{Attolino2025,
+%%   author       = {Attolino, Nicholas and Capitanelli, Alessio and
+%%                   Mastrogiovanni, Fulvio},
+%%   title        = {Achieving Scalable Robot Autonomy via Neurosymbolic Planning
+%%                   Using Lightweight Local {LLM}},
+%%   howpublished = {\url{https://arxiv.org/abs/2505.08492}},
+%%   year         = {2025},
+%%   note         = {arXiv:2505.08492. Accessed: 2026-09-03}
+%% }
+%% =============================================================================
